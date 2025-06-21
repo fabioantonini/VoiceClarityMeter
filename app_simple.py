@@ -1,12 +1,21 @@
+"""
+VoIP Quality Monitor - Simplified Version
+A real-time VoIP call quality monitoring system
+"""
 import os
-
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 from flask_socketio import SocketIO, emit
 import threading
-import json
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from functools import wraps
+
+# Import our VoIP components
+from call_manager import CallManager
+from config_helper import ConfigHelper
+from sip_server import SIPServer
+from mos_calculator import MOSCalculator
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -19,35 +28,32 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# Simple user class for demo authentication
 class SimpleUser(UserMixin):
-    def __init__(self, user_id, email=None, first_name=None, profile_image_url=None):
+    def __init__(self, user_id, email=None, first_name=None):
         self.id = user_id
         self.email = email
         self.first_name = first_name
-        self.profile_image_url = profile_image_url
 
-@login_manager.user_loader
+@login_manager.user_loader  
 def load_user(user_id):
     return SimpleUser(user_id, 'admin@voip-monitor.com', 'Admin')
 
-# Authentication decorator
 def require_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             if request.is_json:
-                return jsonify({'error': 'Autenticazione richiesta', 'redirect': '/auth/demo-login'}), 401
+                return jsonify({'error': 'Authentication required', 'redirect': '/auth/demo-login'}), 401
             return redirect(url_for('demo_login'))
         return f(*args, **kwargs)
     return decorated_function
 
-# Demo login route
+# Authentication routes
 @app.route('/auth/demo-login')
 def demo_login():
     demo_user = SimpleUser('demo_admin', 'admin@voip-monitor.com', 'Admin')
     login_user(demo_user)
-    return redirect(url_for('index'))
+    return redirect(url_for('dashboard'))
 
 @app.route('/auth/logout')
 def auth_logout():
@@ -59,16 +65,12 @@ def auth_logout():
 def make_session_permanent():
     session.permanent = True
 
-# Import after db initialization
-from sip_server import SIPServer
-from call_manager import CallManager
-from config_helper import ConfigHelper
-
-# Global instances
+# Initialize core components
 call_manager = CallManager()
 config_helper = ConfigHelper()
 sip_server = None
 
+# Routes
 @app.route('/')
 def index():
     """Main landing page"""
@@ -77,26 +79,27 @@ def index():
 @app.route('/dashboard')
 @require_login
 def dashboard():
-    """Real-time monitoring dashboard - requires authentication"""
+    """Real-time monitoring dashboard"""
     return render_template('dashboard.html', user=current_user)
 
 @app.route('/config')
 @require_login
 def config():
-    """SIP client configuration helper - requires authentication"""
+    """SIP client configuration helper"""
     return render_template('config.html', user=current_user)
 
+# API Routes
 @app.route('/api/calls/active')
 @require_login
 def get_active_calls():
-    """Get currently active calls - requires authentication"""
+    """Get currently active calls"""
     active_calls = call_manager.get_active_calls()
     return jsonify(active_calls)
 
 @app.route('/api/calls/history')
 @require_login
 def get_call_history():
-    """Get historical call data - requires authentication"""
+    """Get historical call data"""
     limit = request.args.get('limit', 100, type=int)
     history = call_manager.get_call_history(limit)
     return jsonify(history)
@@ -104,14 +107,14 @@ def get_call_history():
 @app.route('/api/stats/summary')
 @require_login
 def get_summary_stats():
-    """Get summary statistics - requires authentication"""
+    """Get summary statistics"""
     stats = call_manager.get_summary_stats()
     return jsonify(stats)
 
 @app.route('/api/config/generate', methods=['POST'])
 @require_login
 def generate_config():
-    """Generate SIP client configuration - requires authentication"""
+    """Generate SIP client configuration"""
     data = request.json or {}
     client_type = data.get('client_type', 'generic')
     server_ip = data.get('server_ip', '127.0.0.1')
@@ -123,7 +126,7 @@ def generate_config():
 @app.route('/api/test/connectivity', methods=['POST'])
 @require_login
 def test_connectivity():
-    """Test network connectivity - requires authentication"""
+    """Test network connectivity"""
     data = request.json or {}
     target_ip = data.get('ip', '127.0.0.1')
     target_port = data.get('port', 5060)
@@ -131,64 +134,71 @@ def test_connectivity():
     result = config_helper.test_connectivity(target_ip, target_port)
     return jsonify(result)
 
+# WebSocket handlers
 @socketio.on('connect')
 def handle_connect():
     """Handle WebSocket connection"""
-    print("Client connected")
+    print("Client connected to WebSocket")
     emit('status', {'message': 'Connected to VoIP Quality Monitor'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Handle WebSocket disconnection"""
-    print("Client disconnected")
+    print("Client disconnected from WebSocket")
 
+# Background services
 def start_sip_server():
     """Start the SIP server in a separate thread"""
     global sip_server
-    sip_server = SIPServer(call_manager, socketio)
-    sip_server.start()
+    try:
+        sip_server = SIPServer(call_manager, socketio)
+        sip_server.start()
+        print("SIP server started successfully on port 5060")
+    except Exception as e:
+        print(f"Failed to start SIP server: {e}")
 
 def broadcast_call_updates():
     """Broadcast call updates to all connected clients"""
     def update_loop():
-        import time
         while True:
-            if call_manager.has_updates():
-                active_calls = call_manager.get_active_calls()
-                socketio.emit('call_update', active_calls)
+            try:
+                if call_manager.has_updates():
+                    # Get current data
+                    active_calls = call_manager.get_active_calls()
+                    summary_stats = call_manager.get_summary_stats()
+                    
+                    # Broadcast to all connected clients
+                    socketio.emit('call_update', {
+                        'active_calls': active_calls,
+                        'summary_stats': summary_stats,
+                        'timestamp': datetime.now().isoformat()
+                    })
                 
-                # Send quality metrics for active calls
-                for call in active_calls:
-                    if call.get('quality_metrics'):
-                        socketio.emit('quality_update', {
-                            'call_id': call['call_id'],
-                            'metrics': call['quality_metrics']
-                        })
-            time.sleep(1)
+                time.sleep(2)  # Update every 2 seconds
+            except Exception as e:
+                print(f"Error in broadcast loop: {e}")
+                time.sleep(5)
     
-    thread = threading.Thread(target=update_loop, daemon=True)
-    thread.start()
+    # Start the update thread
+    update_thread = threading.Thread(target=update_loop, daemon=True)
+    update_thread.start()
+    print("Started call update broadcast service")
 
 if __name__ == '__main__':
-    # Ensure data directory exists
-    os.makedirs('data', exist_ok=True)
+    print("=" * 50)
+    print("VoIP Quality Monitor - Starting Up")
+    print("=" * 50)
     
-    # Initialize empty calls file if it doesn't exist
-    calls_file = 'data/calls.json'
-    if not os.path.exists(calls_file):
-        with open(calls_file, 'w') as f:
-            json.dump([], f)
-    
-    # Start SIP server
+    # Start background services
     sip_thread = threading.Thread(target=start_sip_server, daemon=True)
     sip_thread.start()
     
-    # Start call updates broadcaster
+    # Start broadcast service
     broadcast_call_updates()
     
-    print("VoIP Quality Monitor starting...")
-    print("Dashboard available at: http://0.0.0.0:5000/dashboard")
+    print("Dashboard available at: http://0.0.0.0:5000/")
     print("Configuration helper at: http://0.0.0.0:5000/config")
+    print("SIP server listening on UDP port 5060")
     
     # Run Flask-SocketIO app
     socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False, log_output=True)

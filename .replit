@@ -21,11 +21,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pip install flask flask-socketio numpy && python app.py"
+args = "python app_simple.py"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "pip install flask flask-socketio numpy && python app.py"]
+run = ["sh", "-c", "python app_simple.py"]
 
 [[ports]]
 localPort = 5000
