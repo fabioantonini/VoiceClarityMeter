@@ -1,16 +1,65 @@
-from flask import Flask, render_template, jsonify, request
+import os
+
+from flask import Flask, render_template, jsonify, request, session
 from flask_socketio import SocketIO, emit
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
+from werkzeug.middleware.proxy_fix import ProxyFix
 import threading
 import json
-import os
 from datetime import datetime
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
+class Base(DeclarativeBase):
+    pass
+
+# Initialize Flask app
+app = Flask(__name__)
+app.secret_key = os.environ.get("SESSION_SECRET", "voip-quality-app-secret-key")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1) # needed for url_for to generate with https
+
+# Database configuration
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    'pool_pre_ping': True,
+    "pool_recycle": 300,
+}
+
+# Initialize database
+db = SQLAlchemy(app, model_class=Base)
+
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Create tables
+with app.app_context():
+    import models  # noqa: F401
+    db.create_all()
+    logging.info("Database tables created")
+
+# Import auth after app and db are initialized
+from replit_auth import init_login_manager, make_replit_blueprint, require_login
+from flask_login import current_user
+
+# Initialize authentication
+storage_class = init_login_manager(app, db)
+
+# Register auth blueprint
+app.register_blueprint(make_replit_blueprint(storage_class), url_prefix="/auth")
+
+# Make session permanent
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+
+# Import after db initialization
 from sip_server import SIPServer
 from call_manager import CallManager
 from config_helper import ConfigHelper
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'voip-quality-app-secret-key')
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Global instances
 call_manager = CallManager()
