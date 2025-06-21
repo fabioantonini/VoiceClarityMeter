@@ -14,7 +14,7 @@ from functools import wraps
 # Import our VoIP components
 from call_manager import CallManager
 from config_helper import ConfigHelper
-from sip_server_tcp import SIPServerTCP
+from sip_registrar import SIPRegistrar
 from mos_calculator import MOSCalculator
 
 # Initialize Flask app
@@ -134,6 +134,38 @@ def test_connectivity():
     result = config_helper.test_connectivity(target_ip, target_port)
     return jsonify(result)
 
+@app.route('/api/devices/registered')
+@require_login
+def get_registered_devices():
+    """Get list of registered FXS devices from Asterisk gateway"""
+    if sip_server:
+        devices = sip_server.get_registered_devices()
+        return jsonify(devices)
+    return jsonify([])
+
+@app.route('/api/gateway/status')
+@require_login
+def get_gateway_status():
+    """Get gateway connection status"""
+    if sip_server:
+        devices = sip_server.get_registered_devices()
+        gateway_connected = len(devices) > 0
+        
+        status = {
+            'gateway_connected': gateway_connected,
+            'registered_extensions': len(devices),
+            'extensions': [device['extension'] for device in devices],
+            'last_activity': devices[0]['last_seen'] if devices else None
+        }
+        return jsonify(status)
+    
+    return jsonify({
+        'gateway_connected': False,
+        'registered_extensions': 0,
+        'extensions': [],
+        'last_activity': None
+    })
+
 # WebSocket handlers
 @socketio.on('connect')
 def handle_connect():
@@ -148,14 +180,14 @@ def handle_disconnect():
 
 # Background services
 def start_sip_server():
-    """Start the SIP server with TCP and UDP support"""
+    """Start the SIP Registrar for Asterisk gateway"""
     global sip_server
     try:
-        sip_server = SIPServerTCP(call_manager, socketio)
+        sip_server = SIPRegistrar(call_manager, socketio)
         sip_server.start()
-        print("SIP server started successfully with UDP and TCP support on port 5060")
+        print("SIP Registrar started successfully - ready for Asterisk gateway connections")
     except Exception as e:
-        print(f"Failed to start SIP server: {e}")
+        print(f"Failed to start SIP Registrar: {e}")
 
 def broadcast_call_updates():
     """Broadcast call updates to all connected clients"""

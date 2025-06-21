@@ -66,6 +66,21 @@
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card" id="gateway-status-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Gateway Asterisk</h6>
+                                <h3 id="gateway-status" class="mb-0">Disconnesso</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-network-wired fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="card bg-success text-white">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
@@ -142,6 +157,43 @@
             </div>
         </div>
 
+        <!-- Gateway FXS Devices -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-phone me-2"></i>
+                            Dispositivi FXS Registrati (Gateway Asterisk)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="devicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Interno</th>
+                                        <th>Contatto</th>
+                                        <th>Trasporto</th>
+                                        <th>Ultimo Visto</th>
+                                        <th>Scadenza</th>
+                                        <th>Stato</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="devicesTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            In attesa di connessione del gateway Asterisk...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Active Calls Table -->
         <div class="row mb-4">
             <div class="col-12">
@@ -149,7 +201,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-phone-volume me-2"></i>
-                            Active Calls
+                            Chiamate Attive
                         </h5>
                     </div>
                     <div class="card-body">
