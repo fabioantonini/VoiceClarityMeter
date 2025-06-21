@@ -25,6 +25,23 @@
                 <a class="nav-link active" href="/config">
                     <i class="fas fa-cog me-1"></i>Configuration
                 </a>
+                {% if user %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            {% if user.profile_image_url %}
+                                <img src="{{ user.profile_image_url }}" class="rounded-circle me-1" width="24" height="24" style="object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-user me-1"></i>
+                            {% endif %}
+                            {{ user.first_name or 'Admin' }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/auth/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </nav>

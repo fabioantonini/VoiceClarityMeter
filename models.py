@@ -1,10 +1,16 @@
 from datetime import datetime
-
-from app import db
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
+from flask_sqlalchemy import SQLAlchemy
 
+# Global db reference - will be set from app.py
+db = None
+
+def init_models(database):
+    """Initialize models with the database instance"""
+    global db
+    db = database
 
 # (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 class User(UserMixin, db.Model):

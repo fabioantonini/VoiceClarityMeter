@@ -35,9 +35,13 @@ db = SQLAlchemy(app, model_class=Base)
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Create tables
+# Create tables and initialize auth
 with app.app_context():
-    import models  # noqa: F401
+    # Inject db into models to avoid circular imports
+    import models
+    models.db = db
+    
+    # Create all tables
     db.create_all()
     logging.info("Database tables created")
 
@@ -69,38 +73,50 @@ sip_server = None
 @app.route('/')
 def index():
     """Main landing page"""
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return render_template('index.html', user=current_user)
+    else:
+        return render_template('index.html')
 
 @app.route('/dashboard')
+@require_login
 def dashboard():
-    """Real-time monitoring dashboard"""
-    return render_template('dashboard.html')
+    """Real-time monitoring dashboard - requires authentication"""
+    return render_template('dashboard.html', user=current_user)
 
 @app.route('/config')
+@require_login
 def config():
-    """SIP client configuration helper"""
-    return render_template('config.html')
+    """SIP client configuration helper - requires authentication"""
+    return render_template('config.html', user=current_user)
 
 @app.route('/api/calls/active')
+@require_login
 def get_active_calls():
-    """Get currently active calls"""
-    return jsonify(call_manager.get_active_calls())
+    """Get currently active calls - requires authentication"""
+    active_calls = call_manager.get_active_calls()
+    return jsonify(active_calls)
 
 @app.route('/api/calls/history')
+@require_login
 def get_call_history():
-    """Get historical call data"""
+    """Get historical call data - requires authentication"""
     limit = request.args.get('limit', 100, type=int)
-    return jsonify(call_manager.get_call_history(limit))
+    history = call_manager.get_call_history(limit)
+    return jsonify(history)
 
 @app.route('/api/stats/summary')
+@require_login
 def get_summary_stats():
-    """Get summary statistics"""
-    return jsonify(call_manager.get_summary_stats())
+    """Get summary statistics - requires authentication"""
+    stats = call_manager.get_summary_stats()
+    return jsonify(stats)
 
 @app.route('/api/config/generate', methods=['POST'])
+@require_login
 def generate_config():
-    """Generate SIP client configuration"""
-    data = request.json
+    """Generate SIP client configuration - requires authentication"""
+    data = request.json or {}
     client_type = data.get('client_type', 'generic')
     server_ip = data.get('server_ip', '127.0.0.1')
     server_port = data.get('server_port', 5060)
@@ -109,9 +125,10 @@ def generate_config():
     return jsonify(config)
 
 @app.route('/api/test/connectivity', methods=['POST'])
+@require_login
 def test_connectivity():
-    """Test network connectivity"""
-    data = request.json
+    """Test network connectivity - requires authentication"""
+    data = request.json or {}
     target_ip = data.get('ip', '127.0.0.1')
     target_port = data.get('port', 5060)
     
@@ -121,13 +138,13 @@ def test_connectivity():
 @socketio.on('connect')
 def handle_connect():
     """Handle WebSocket connection"""
-    print(f"Client connected: {request.sid}")
+    print("Client connected")
     emit('status', {'message': 'Connected to VoIP Quality Monitor'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Handle WebSocket disconnection"""
-    print(f"Client disconnected: {request.sid}")
+    print("Client disconnected")
 
 def start_sip_server():
     """Start the SIP server in a separate thread"""
@@ -178,4 +195,4 @@ if __name__ == '__main__':
     print("Configuration helper at: http://0.0.0.0:5000/config")
     
     # Run Flask-SocketIO app
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False, log_output=True)

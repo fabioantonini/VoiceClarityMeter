@@ -22,7 +22,6 @@ def init_login_manager(app, db):
     from models import User, OAuth
     
     login_manager = LoginManager(app)
-    login_manager.login_view = 'replit_auth.login'
     
     @login_manager.user_loader
     def load_user(user_id):
