@@ -61,6 +61,8 @@ class Dashboard {
         this.refreshActiveCalls();
         this.refreshCallHistory();
         this.refreshSummaryStats();
+        this.refreshGatewayStatus();
+        this.refreshRegisteredDevices();
     }
     
     refreshActiveCalls() {
@@ -82,6 +84,20 @@ class Dashboard {
             .then(response => response.json())
             .then(data => this.updateSummaryStats(data))
             .catch(error => console.error('Error loading summary stats:', error));
+    }
+    
+    refreshGatewayStatus() {
+        fetch('/api/gateway/status')
+            .then(response => response.json())
+            .then(data => this.updateGatewayStatus(data))
+            .catch(error => console.error('Error loading gateway status:', error));
+    }
+    
+    refreshRegisteredDevices() {
+        fetch('/api/devices/registered')
+            .then(response => response.json())
+            .then(data => this.updateRegisteredDevices(data))
+            .catch(error => console.error('Error loading registered devices:', error));
     }
     
     updateDashboard(data) {
@@ -170,6 +186,56 @@ class Dashboard {
             const mosValue = parseFloat(mosElement.textContent);
             mosElement.className = `h4 mb-0 badge ${this.getMosClass(mosValue)}`;
         }
+    }
+    
+    updateGatewayStatus(data) {
+        const statusElement = document.getElementById('gateway-status');
+        const cardElement = document.getElementById('gateway-status-card');
+        
+        if (statusElement && cardElement) {
+            if (data.gateway_connected) {
+                statusElement.textContent = `Connesso (${data.registered_extensions} int.)`;
+                cardElement.className = 'card bg-success text-white';
+            } else {
+                statusElement.textContent = 'Disconnesso';
+                cardElement.className = 'card bg-danger text-white';
+            }
+        }
+    }
+    
+    updateRegisteredDevices(devices) {
+        const tbody = document.getElementById('devicesTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (devices.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        Nessun dispositivo FXS registrato dal gateway Asterisk
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        devices.forEach(device => {
+            const row = document.createElement('tr');
+            const lastSeen = new Date(device.last_seen).toLocaleString();
+            const expires = new Date(device.expires).toLocaleString();
+            const isExpired = new Date(device.expires) < new Date();
+            
+            row.innerHTML = `
+                <td><strong>${device.extension}</strong></td>
+                <td><code>${device.contact}</code></td>
+                <td><span class="badge ${device.transport === 'TCP' ? 'bg-primary' : 'bg-info'}">${device.transport}</span></td>
+                <td>${lastSeen}</td>
+                <td>${expires}</td>
+                <td><span class="badge ${isExpired ? 'bg-danger' : 'bg-success'}">${isExpired ? 'Scaduto' : 'Attivo'}</span></td>
+            `;
+            tbody.appendChild(row);
+        });
     }
     
     // Utility functions

@@ -102,8 +102,13 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 21, 2025: Initial setup with UDP SIP server
 - June 21, 2025: Added TCP transport support for SIP protocol with dual UDP/TCP operation
 - June 21, 2025: Fixed JavaScript WebSocket connection issues and simplified dashboard interface
+- June 21, 2025: Converted system to SIP Registrar/Proxy for Asterisk gateway with FXS interfaces
+- June 21, 2025: Added gateway status monitoring and registered devices display in dashboard
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
-Technical requirements: Support for both UDP and TCP transport protocols for SIP communication.
+Preferred communication style: Simple, everyday language (Italian).
+Technical requirements: 
+- Support for both UDP and TCP transport protocols for SIP communication
+- VoIP gateway integration: Asterisk-based gateway with two FXS interfaces for traditional phones
+- System acts as SIP Registrar and Proxy for gateway device registration and call routing
