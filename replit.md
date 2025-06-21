@@ -21,7 +21,7 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - **DataTables** for tabular data management
 
 ### Communication Flow
-- SIP signaling on UDP port 5060
+- SIP signaling on UDP and TCP port 5060 (dual transport support)
 - RTP media processing on dynamically allocated ports
 - WebSocket connections for real-time dashboard updates
 - RESTful API endpoints for data retrieval
@@ -30,8 +30,8 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 
 ### Core Python Modules
 
-1. **app.py** - Main Flask application with routes and WebSocket handlers
-2. **sip_server.py** - SIP protocol implementation for call setup/teardown
+1. **app_simple.py** - Main Flask application with routes and WebSocket handlers
+2. **sip_server_tcp.py** - SIP protocol implementation with UDP and TCP transport support
 3. **rtp_processor.py** - RTP packet analysis and quality metric calculation
 4. **call_manager.py** - Call state management and data persistence
 5. **mos_calculator.py** - E-Model based MOS calculation algorithm
@@ -73,9 +73,10 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - **Socket.IO** - WebSocket client library
 
 ### Network Protocols
-- **SIP (Session Initiation Protocol)** - VoIP session management
+- **SIP (Session Initiation Protocol)** - VoIP session management over UDP and TCP
 - **RTP (Real-time Transport Protocol)** - Audio packet delivery
-- **UDP** - Transport layer for SIP and RTP communication
+- **UDP/TCP** - Dual transport layer support for SIP signaling
+- **WebSocket** - Real-time dashboard communication
 
 ## Deployment Strategy
 
@@ -98,8 +99,11 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 
 ## Changelog
 
-- June 21, 2025. Initial setup
+- June 21, 2025: Initial setup with UDP SIP server
+- June 21, 2025: Added TCP transport support for SIP protocol with dual UDP/TCP operation
+- June 21, 2025: Fixed JavaScript WebSocket connection issues and simplified dashboard interface
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Technical requirements: Support for both UDP and TCP transport protocols for SIP communication.
