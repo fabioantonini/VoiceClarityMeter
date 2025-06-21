@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration - VoIP Quality Monitor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-phone-alt me-2"></i>
+                VoIP Quality Monitor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <a class="nav-link" href="/dashboard">
+                    <i class="fas fa-chart-line me-1"></i>Dashboard
+                </a>
+                <a class="nav-link active" href="/config">
+                    <i class="fas fa-cog me-1"></i>Configuration
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="mb-4">
+                    <i class="fas fa-cogs me-2"></i>
+                    SIP Client Configuration Helper
+                </h2>
+
+                <!-- Configuration Generator -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-magic me-2"></i>
+                            Generate Configuration
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="configForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">SIP Client Type</label>
+                                    <select class="form-select" id="clientType" required>
+                                        <option value="">Select SIP Client</option>
+                                        <option value="xlite">X-Lite</option>
+                                        <option value="zoiper">Zoiper</option>
+                                        <option value="linphone">Linphone</option>
+                                        <option value="asterisk">Asterisk</option>
+                                        <option value="opensips">OpenSIPS</option>
+                                        <option value="generic">Generic SIP Client</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Server IP Address</label>
+                                    <input type="text" class="form-control" id="serverIp" value="" placeholder="e.g., 192.168.1.100" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Server Port</label>
+                                    <input type="number" class="form-control" id="serverPort" value="5060" min="1" max="65535" required>
+                                </div>
+                                <div class="col-md-6 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-cog me-2"></i>
+                                        Generate Configuration
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Configuration Output -->
+                <div class="card mb-4" id="configOutput" style="display: none;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" id="configTitle">
+                            <i class="fas fa-file-code me-2"></i>
+                            Configuration
+                        </h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="copyConfig()">
+                            <i class="fas fa-copy me-1"></i>Copy
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="configContent"></div>
+                    </div>
+                </div>
+
+                <!-- Network Testing -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-network-wired me-2"></i>
+                            Network Connectivity Test
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="testForm">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Target IP</label>
+                                    <input type="text" class="form-control" id="testIp" placeholder="192.168.1.100" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Target Port</label>
+                                    <input type="number" class="form-control" id="testPort" value="5060" min="1" max="65535" required>
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-info w-100">
+                                        <i class="fas fa-satellite-dish me-2"></i>
+                                        Test Connection
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div id="testResults" style="display: none;" class="mt-3">
+                            <h6>Test Results:</h6>
+                            <div id="testResultsContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting Guide -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            Troubleshooting Guide
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion" id="troubleshootingAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#registrationIssues">
+                                        <i class="fas fa-user-times me-2 text-danger"></i>
+                                        Registration Failed
+                                    </button>
+                                </h2>
+                                <div id="registrationIssues" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <h6>Symptoms:</h6>
+                                        <ul>
+                                            <li>Account shows as offline</li>
+                                            <li>Registration timeout errors</li>
+                                            <li>Authentication failures</li>
+                                        </ul>
+                                        <h6>Solutions:</h6>
+                                        <ul>
+                                            <li>Verify server IP address and port (default: 5060)</li>
+                                            <li>Check network connectivity using the test tool above</li>
+                                            <li>Ensure firewall allows UDP traffic on port 5060</li>
+                                            <li>Try both UDP and TCP transport protocols</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#audioIssues">
+                                        <i class="fas fa-volume-mute me-2 text-warning"></i>
+                                        Audio Quality Issues
+                                    </button>
+                                </h2>
+                                <div id="audioIssues" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <h6>Symptoms:</h6>
+                                        <ul>
+                                            <li>Choppy or robotic audio</li>
+                                            <li>Echo or feedback</li>
+                                            <li>One-way audio problems</li>
+                                        </ul>
+                                        <h6>Solutions:</h6>
+                                        <ul>
+                                            <li>Check available bandwidth (minimum 64kbps per call)</li>
+                                            <li>Configure QoS/traffic shaping for VoIP</li>
+                                            <li>Open RTP port range (10000-20000) in firewall</li>
+                                            <li>Use G.711 codec for best quality</li>
+                                            <li>Configure NAT traversal (STUN/ICE) if behind NAT</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#networkRequirements">
+                                        <i class="fas fa-network-wired me-2 text-info"></i>
+                                        Network Requirements
+                                    </button>
+                                </h2>
+                                <div id="networkRequirements" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <h6>Recommended Network Settings:</h6>
+                                        <ul>
+                                            <li><strong>Bandwidth:</strong> Minimum 64 kbps per call (G.711)</li>
+                                            <li><strong>Latency:</strong> Less than 150ms one-way</li>
+                                            <li><strong>Jitter:</strong> Less than 30ms</li>
+                                            <li><strong>Packet Loss:</strong> Less than 1%</li>
+                                        </ul>
+                                        <h6>Firewall Ports:</h6>
+                                        <ul>
+                                            <li><strong>SIP:</strong> UDP/TCP port 5060</li>
+                                            <li><strong>RTP:</strong> UDP ports 10000-20000</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Test Instructions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-play-circle me-2"></i>
+                            Quick Test Instructions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Generate configuration for your SIP client above</li>
+                            <li>Configure your SIP client with the provided settings</li>
+                            <li>Register your client with the VoIP Quality Monitor</li>
+                            <li>Make a test call (URI: sip:test@[server-ip])</li>
+                            <li>Speak for 30-60 seconds to get accurate quality metrics</li>
+                            <li>View results on the <a href="/dashboard">Dashboard</a></li>
+                        </ol>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Tip:</strong> For best results, speak clearly and maintain a consistent volume during the test call.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/config.js"></script>
+</body>
+</html>

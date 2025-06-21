@@ -1,0 +1,193 @@
+import socket
+import struct
+import threading
+import time
+from datetime import datetime
+import numpy as np
+from mos_calculator import MOSCalculator
+
+class RTPProcessor:
+    def __init__(self, call_id, port, call_manager):
+        self.call_id = call_id
+        self.port = port
+        self.call_manager = call_manager
+        self.socket = None
+        self.running = False
+        self.mos_calculator = MOSCalculator()
+        
+        # Quality metrics
+        self.packets_received = 0
+        self.packets_lost = 0
+        self.jitter_buffer = []
+        self.last_packet_time = None
+        self.sequence_numbers = []
+        self.timestamps = []
+        
+    def start_processing(self):
+        """Start processing RTP packets"""
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.socket.bind(('0.0.0.0', self.port))
+            self.socket.settimeout(1.0)
+            self.running = True
+            
+            print(f"RTP Processor listening on port {self.port} for call {self.call_id}")
+            
+            while self.running:
+                try:
+                    data, addr = self.socket.recvfrom(1024)
+                    self.process_packet(data, addr)
+                    
+                except socket.timeout:
+                    # Check if call is still active
+                    if not self.call_manager.is_call_active(self.call_id):
+                        break
+                    continue
+                    
+                except Exception as e:
+                    print(f"Error processing RTP packet: {e}")
+                    
+        except Exception as e:
+            print(f"Error starting RTP processor: {e}")
+        finally:
+            self.stop_processing()
+            
+    def stop_processing(self):
+        """Stop processing RTP packets"""
+        self.running = False
+        if self.socket:
+            self.socket.close()
+            
+    def process_packet(self, data, addr):
+        """Process individual RTP packet"""
+        try:
+            if len(data) < 12:  # RTP header is at least 12 bytes
+                return
+                
+            # Parse RTP header
+            rtp_header = self.parse_rtp_header(data)
+            
+            if rtp_header:
+                self.packets_received += 1
+                current_time = time.time()
+                
+                # Calculate packet loss
+                self.calculate_packet_loss(rtp_header['sequence'])
+                
+                # Calculate jitter
+                if self.last_packet_time:
+                    inter_arrival = current_time - self.last_packet_time
+                    self.calculate_jitter(inter_arrival)
+                    
+                self.last_packet_time = current_time
+                
+                # Update call metrics every 10 packets
+                if self.packets_received % 10 == 0:
+                    self.update_call_metrics()
+                    
+        except Exception as e:
+            print(f"Error processing packet: {e}")
+            
+    def parse_rtp_header(self, data):
+        """Parse RTP header"""
+        try:
+            # RTP header format (first 12 bytes)
+            header = struct.unpack('!BBHII', data[:12])
+            
+            version = (header[0] >> 6) & 0x3
+            padding = (header[0] >> 5) & 0x1
+            extension = (header[0] >> 4) & 0x1
+            cc = header[0] & 0xF
+            
+            marker = (header[1] >> 7) & 0x1
+            payload_type = header[1] & 0x7F
+            
+            sequence = header[2]
+            timestamp = header[3]
+            ssrc = header[4]
+            
+            return {
+                'version': version,
+                'sequence': sequence,
+                'timestamp': timestamp,
+                'ssrc': ssrc,
+                'payload_type': payload_type,
+                'marker': marker
+            }
+            
+        except Exception as e:
+            print(f"Error parsing RTP header: {e}")
+            return None
+            
+    def calculate_packet_loss(self, sequence):
+        """Calculate packet loss percentage"""
+        self.sequence_numbers.append(sequence)
+        
+        if len(self.sequence_numbers) > 100:
+            # Keep only last 100 sequences
+            self.sequence_numbers = self.sequence_numbers[-100:]
+            
+        if len(self.sequence_numbers) > 1:
+            expected_packets = max(self.sequence_numbers) - min(self.sequence_numbers) + 1
+            received_packets = len(set(self.sequence_numbers))
+            self.packets_lost = expected_packets - received_packets
+            
+    def calculate_jitter(self, inter_arrival):
+        """Calculate jitter using RFC 3550 algorithm"""
+        self.jitter_buffer.append(inter_arrival)
+        
+        if len(self.jitter_buffer) > 50:
+            # Keep only last 50 measurements
+            self.jitter_buffer = self.jitter_buffer[-50:]
+            
+    def get_jitter(self):
+        """Get current jitter value in milliseconds"""
+        if len(self.jitter_buffer) < 2:
+            return 0
+            
+        # Calculate jitter as standard deviation of inter-arrival times
+        jitter = np.std(self.jitter_buffer) * 1000  # Convert to milliseconds
+        return jitter
+        
+    def get_packet_loss_rate(self):
+        """Get packet loss rate as percentage"""
+        if self.packets_received == 0:
+            return 0
+            
+        total_expected = self.packets_received + self.packets_lost
+        if total_expected == 0:
+            return 0
+            
+        return (self.packets_lost / total_expected) * 100
+        
+    def update_call_metrics(self):
+        """Update call quality metrics"""
+        try:
+            jitter = self.get_jitter()
+            packet_loss = self.get_packet_loss_rate()
+            
+            # Estimate delay (simplified - in production would use RTCP)
+            delay = 50  # Default assumption of 50ms delay
+            
+            # Calculate MOS score
+            mos_score = self.mos_calculator.calculate_mos(
+                packet_loss_rate=packet_loss,
+                jitter=jitter,
+                delay=delay
+            )
+            
+            # Update call manager with metrics
+            metrics = {
+                'timestamp': datetime.now().isoformat(),
+                'packets_received': self.packets_received,
+                'packets_lost': self.packets_lost,
+                'packet_loss_rate': packet_loss,
+                'jitter': jitter,
+                'delay': delay,
+                'mos_score': mos_score
+            }
+            
+            self.call_manager.update_call_metrics(self.call_id, metrics)
+            
+        except Exception as e:
+            print(f"Error updating call metrics: {e}")
