@@ -14,7 +14,7 @@ from functools import wraps
 # Import our VoIP components
 from call_manager import CallManager
 from config_helper import ConfigHelper
-from sip_server import SIPServer
+from sip_server_tcp import SIPServerTCP
 from mos_calculator import MOSCalculator
 
 # Initialize Flask app
@@ -148,12 +148,12 @@ def handle_disconnect():
 
 # Background services
 def start_sip_server():
-    """Start the SIP server in a separate thread"""
+    """Start the SIP server with TCP and UDP support"""
     global sip_server
     try:
-        sip_server = SIPServer(call_manager, socketio)
+        sip_server = SIPServerTCP(call_manager, socketio)
         sip_server.start()
-        print("SIP server started successfully on port 5060")
+        print("SIP server started successfully with UDP and TCP support on port 5060")
     except Exception as e:
         print(f"Failed to start SIP server: {e}")
 
