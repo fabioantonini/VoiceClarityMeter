@@ -166,6 +166,20 @@ def get_gateway_status():
         'last_activity': None
     })
 
+@app.route('/api/extensions/test')
+@require_login
+def get_test_extensions():
+    """Get available test extensions"""
+    if sip_server:
+        return jsonify(sip_server.test_extensions)
+    
+    return jsonify({
+        '999': {'name': 'Test Audio Qualità', 'simulation': 'high_quality'},
+        '998': {'name': 'Test con Rumore', 'simulation': 'with_noise'},
+        '997': {'name': 'Test Echo/Delay', 'simulation': 'echo_delay'},
+        '996': {'name': 'Test Packet Loss', 'simulation': 'packet_loss'}
+    })
+
 # WebSocket handlers
 @socketio.on('connect')
 def handle_connect():

@@ -157,8 +157,77 @@
             </div>
         </div>
 
-        <!-- Gateway FXS Devices -->
+        <!-- Test Extensions -->
         <div class="row mb-4">
+            <div class="col-lg-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-flask me-2"></i>
+                            Estensioni di Test Disponibili
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Interno</th>
+                                        <th>Descrizione</th>
+                                        <th>Scenario</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="testExtensionsBody">
+                                    <tr><td>999</td><td>Test Audio Qualità</td><td><span class="badge bg-success">Alta Qualità</span></td></tr>
+                                    <tr><td>998</td><td>Test con Rumore</td><td><span class="badge bg-warning">Con Rumore</span></td></tr>
+                                    <tr><td>997</td><td>Test Echo/Delay</td><td><span class="badge bg-info">Echo/Delay</span></td></tr>
+                                    <tr><td>996</td><td>Test Packet Loss</td><td><span class="badge bg-danger">Packet Loss</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="alert alert-info alert-sm mt-3">
+                            <small><i class="fas fa-info-circle me-1"></i>
+                            Chiama questi interni dal tuo gateway per testare diversi scenari di qualità audio.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-phone me-2"></i>
+                            Dispositivi FXS Registrati
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="devicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Interno</th>
+                                        <th>Contatto</th>
+                                        <th>Trasporto</th>
+                                        <th>Stato</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="devicesTableBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            In attesa di connessione del gateway Asterisk...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gateway FXS Devices -->
+        <div class="row mb-4" style="display: none;">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">

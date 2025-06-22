@@ -212,8 +212,8 @@ class Dashboard {
         if (devices.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center text-muted">
-                        Nessun dispositivo FXS registrato dal gateway Asterisk
+                    <td colspan="4" class="text-center text-muted">
+                        Gateway non connesso
                     </td>
                 </tr>
             `;
@@ -222,16 +222,12 @@ class Dashboard {
         
         devices.forEach(device => {
             const row = document.createElement('tr');
-            const lastSeen = new Date(device.last_seen).toLocaleString();
-            const expires = new Date(device.expires).toLocaleString();
             const isExpired = new Date(device.expires) < new Date();
             
             row.innerHTML = `
                 <td><strong>${device.extension}</strong></td>
-                <td><code>${device.contact}</code></td>
+                <td><code style="font-size: 0.8em;">${device.contact.replace('sip:', '').split('@')[0]}</code></td>
                 <td><span class="badge ${device.transport === 'TCP' ? 'bg-primary' : 'bg-info'}">${device.transport}</span></td>
-                <td>${lastSeen}</td>
-                <td>${expires}</td>
                 <td><span class="badge ${isExpired ? 'bg-danger' : 'bg-success'}">${isExpired ? 'Scaduto' : 'Attivo'}</span></td>
             `;
             tbody.appendChild(row);

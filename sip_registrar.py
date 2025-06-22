@@ -30,6 +30,14 @@ class SIPRegistrar:
         self.domain = "voip-monitor.local"
         self.registration_expires = 3600  # 1 hour
         
+        # Test extensions for quality monitoring
+        self.test_extensions = {
+            '999': {'name': 'Test Audio Qualità', 'simulation': 'high_quality'},
+            '998': {'name': 'Test con Rumore', 'simulation': 'with_noise'},
+            '997': {'name': 'Test Echo/Delay', 'simulation': 'echo_delay'},
+            '996': {'name': 'Test Packet Loss', 'simulation': 'packet_loss'}
+        }
+        
     def start(self):
         """Start SIP Registrar and Proxy services"""
         try:
@@ -299,8 +307,11 @@ class SIPRegistrar:
             
             self.call_manager.start_call(call_id, session_info)
             
-            # Check if destination is registered
-            if to_ext and to_ext in self.registered_devices:
+            # Check if destination is a test extension
+            if to_ext and to_ext in self.test_extensions:
+                # Handle test extension call
+                self.handle_test_extension_call(to_ext, call_id, headers, addr, transport, client_socket)
+            elif to_ext and to_ext in self.registered_devices:
                 # Forward INVITE to registered device
                 self.forward_invite(request_line, headers, to_ext, transport, client_socket)
             else:
@@ -337,6 +348,91 @@ class SIPRegistrar:
     def handle_cancel(self, request_line, headers, addr, transport, client_socket=None):
         """Handle CANCEL requests"""
         self.send_response(addr, '200', 'OK', headers, transport, client_socket)
+        
+    def handle_test_extension_call(self, extension, call_id, headers, addr, transport, client_socket):
+        """Handle calls to test extensions with quality simulation"""
+        test_info = self.test_extensions[extension]
+        
+        print(f"Test call to {extension} ({test_info['name']}) - Call-ID: {call_id}")
+        
+        # Send 200 OK with SDP for test extension
+        self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id)
+        
+        # Start simulated RTP processing with quality patterns
+        self.start_test_rtp_processing(call_id, test_info['simulation'], addr[0])
+        
+        # Notify dashboard of test call
+        self.socketio.emit('test_call_started', {
+            'call_id': call_id,
+            'extension': extension,
+            'test_name': test_info['name'],
+            'simulation': test_info['simulation'],
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    def start_test_rtp_processing(self, call_id, simulation_type, remote_ip):
+        """Start simulated RTP processing for test extensions"""
+        def process_test_rtp():
+            try:
+                # Simulate different quality scenarios
+                import time
+                import random
+                
+                metrics_history = []
+                
+                for i in range(60):  # Simulate 60 seconds of call
+                    if not self.call_manager.is_call_active(call_id):
+                        break
+                        
+                    # Generate metrics based on simulation type
+                    if simulation_type == 'high_quality':
+                        mos = 4.2 + random.uniform(-0.1, 0.3)
+                        packet_loss = random.uniform(0, 0.5)
+                        jitter = random.uniform(5, 15)
+                        delay = random.uniform(20, 40)
+                    elif simulation_type == 'with_noise':
+                        mos = 2.8 + random.uniform(-0.3, 0.5)
+                        packet_loss = random.uniform(1, 5)
+                        jitter = random.uniform(15, 35)
+                        delay = random.uniform(40, 80)
+                    elif simulation_type == 'echo_delay':
+                        mos = 2.2 + random.uniform(-0.2, 0.4)
+                        packet_loss = random.uniform(0.5, 2)
+                        jitter = random.uniform(25, 50)
+                        delay = random.uniform(150, 300)
+                    elif simulation_type == 'packet_loss':
+                        mos = 1.8 + random.uniform(-0.3, 0.7)
+                        packet_loss = random.uniform(5, 15)
+                        jitter = random.uniform(30, 60)
+                        delay = random.uniform(50, 120)
+                    else:
+                        mos = 3.5 + random.uniform(-0.5, 0.5)
+                        packet_loss = random.uniform(0, 2)
+                        jitter = random.uniform(10, 30)
+                        delay = random.uniform(30, 60)
+                    
+                    # Update call metrics
+                    metrics = {
+                        'mos_score': max(1.0, min(5.0, mos)),
+                        'packet_loss_rate': max(0, packet_loss),
+                        'jitter': max(0, jitter),
+                        'delay': max(0, delay),
+                        'packets_received': 1000 + i * 50,
+                        'packets_lost': int(packet_loss * 10)
+                    }
+                    
+                    self.call_manager.update_call_metrics(call_id, metrics)
+                    metrics_history.append(metrics)
+                    
+                    time.sleep(1)
+                    
+                print(f"Test call {call_id} simulation completed")
+                
+            except Exception as e:
+                print(f"Error in test RTP processing for call {call_id}: {e}")
+        
+        test_thread = threading.Thread(target=process_test_rtp, daemon=True)
+        test_thread.start()
         
     def forward_invite(self, request_line, headers, to_extension, transport, client_socket=None):
         """Forward INVITE to registered device"""
