@@ -1,0 +1,96 @@
+# Profile SIP per WebApp - SENZA AUTENTICAZIONE
+# Gateway Welcome Italia - Configurazione corretta
+# Data: 2025-06-23
+
+# ==================================================================
+# NUOVO PROFILE SIP per WebApp (NO AUTH)
+# ==================================================================
+
+# Crea nuovo profile dedicato alla webapp
+set voip sip profile create webapp-monitor
+set voip sip profile webapp-monitor registrar 172.31.128.34:5060
+set voip sip profile webapp-monitor outbound-proxy 172.31.128.34:5060
+set voip sip profile webapp-monitor sip-domain voip-monitor.local
+
+# Configurazione codec per monitoraggio
+set voip sip profile webapp-monitor codec-type g729 alaw ulaw
+set voip sip profile webapp-monitor dtmf rfc4733
+set voip sip profile webapp-monitor registration-expiry 3600
+set voip sip profile webapp-monitor registration-retry-timer 60
+
+# Funzioni per analisi qualità
+set voip sip profile webapp-monitor caller-rewrite yes
+set voip sip profile webapp-monitor rfc3325-header preferred
+set voip sip profile webapp-monitor enable-prack supported
+set voip sip profile webapp-monitor transport-protocol udp
+
+# ==================================================================
+# TRUNK SIP per WebApp - SENZA AUTENTICAZIONE
+# ==================================================================
+
+# Trunk dedicato per webapp (NO username/password)
+set voip trunk sip create webapp-trunk
+set voip trunk sip webapp-trunk display-name "Gateway Monitor"
+set voip trunk sip webapp-trunk codec-type g729 alaw ulaw
+set voip trunk sip webapp-trunk dtmf rfc4733
+set voip trunk sip webapp-trunk sip-profile webapp-monitor
+set voip trunk sip webapp-trunk enable yes
+
+# NOTA: NO username, NO password - WebApp accetta tutte le registrazioni
+
+# ==================================================================
+# ROUTING per CHIAMATE di TEST
+# ==================================================================
+
+# Route per numeri test webapp (996-999)
+set voip route create webapp-test
+set voip route webapp-test destination-pattern 99[6-9]
+set voip route webapp-test trunk webapp-trunk
+set voip route webapp-test enable yes
+
+# ==================================================================
+# VERIFICA CONFIGURAZIONE
+# ==================================================================
+
+# Verifica profile
+show voip sip profile webapp-monitor
+
+# Verifica trunk
+show voip trunk webapp-trunk
+
+# Verifica registrazione (dovrebbe funzionare subito)
+show voip sip registration
+
+# Verifica route
+show voip route webapp-test
+
+# ==================================================================
+# COME FUNZIONA
+# ==================================================================
+
+# 1. Gateway si registra alla WebApp SENZA credenziali
+# 2. WebApp accetta automaticamente la registrazione
+# 3. Chiamate 996-999 vengono instradate alla WebApp
+# 4. WebApp analizza qualità RTP in tempo reale
+
+# ==================================================================
+# TEST
+# ==================================================================
+
+# Dopo configurazione:
+# 1. Chiama 999 -> Test Qualità
+# 2. Chiama 998 -> Test Rumore
+# 3. Chiama 997 -> Test Echo/Delay
+# 4. Chiama 996 -> Test Packet Loss
+
+# Verifica risultati in: http://172.31.128.34:5000/dashboard
+
+# ==================================================================
+# DIFFERENZA da Welcome Italia
+# ==================================================================
+
+# Welcome Italia: username/password richiesti per registrazione
+# WebApp: registrazione aperta, nessuna autenticazione SIP
+
+# Questo è corretto per monitoraggio qualità - non serve sicurezza
+# per chiamate test interne
