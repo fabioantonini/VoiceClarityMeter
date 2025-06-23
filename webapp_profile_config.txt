@@ -1,0 +1,127 @@
+# Configurazione Profile SIP dedicato per VoIP Quality Monitor WebApp
+# Gateway Welcome Italia - Nuovo Profile separato
+# Data: 2025-06-23
+
+# ==================================================================
+# NUOVO PROFILE SIP per WebApp (separato da Welcome Italia)
+# ==================================================================
+
+# Crea nuovo profile SIP dedicato alla webapp
+set voip sip profile create webapp-monitor
+set voip sip profile webapp-monitor registrar 172.31.128.34:5060
+set voip sip profile webapp-monitor outbound-proxy 172.31.128.34:5060
+set voip sip profile webapp-monitor sip-domain voip-monitor.local
+
+# Configurazione codec ottimizzata per monitoraggio
+set voip sip profile webapp-monitor codec-type g729 alaw ulaw
+set voip sip profile webapp-monitor dtmf rfc4733
+set voip sip profile webapp-monitor registration-expiry 3600
+set voip sip profile webapp-monitor registration-retry-timer 60
+
+# Funzioni per analisi qualità
+set voip sip profile webapp-monitor caller-rewrite yes
+set voip sip profile webapp-monitor rfc3325-header preferred
+set voip sip profile webapp-monitor enable-prack supported
+
+# Configurazioni aggiuntive per monitoraggio
+set voip sip profile webapp-monitor transport-protocol udp
+set voip sip profile webapp-monitor user-agent VoipGateway-Monitor/1.0
+
+# ==================================================================
+# NUOVO TRUNK SIP per WebApp
+# ==================================================================
+
+# Crea trunk dedicato per webapp
+set voip trunk sip create webapp-trunk
+set voip trunk sip webapp-trunk username gateway-monitor
+set voip trunk sip webapp-trunk authentication-username gateway-monitor
+set voip trunk sip webapp-trunk authentication-password MonitorPass123
+set voip trunk sip webapp-trunk display-name "Gateway Monitor"
+set voip trunk sip webapp-trunk codec-type g729 alaw ulaw
+set voip trunk sip webapp-trunk dtmf rfc4733
+set voip trunk sip webapp-trunk sip-profile webapp-monitor
+set voip trunk sip webapp-trunk enable yes
+
+# ==================================================================
+# ROUTING per CHIAMATE di TEST
+# ==================================================================
+
+# Crea route per numeri test webapp (999, 998, 997, 996)
+set voip route create webapp-test
+set voip route webapp-test destination-pattern 99[6-9]
+set voip route webapp-test trunk webapp-trunk
+set voip route webapp-test enable yes
+
+# ==================================================================
+# CONFIGURAZIONE OPZIONALE TLS
+# ==================================================================
+
+# Per usare TLS/SIPS (porta 5061):
+# set voip sip profile webapp-monitor transport-protocol tls
+# set voip sip profile webapp-monitor registrar 172.31.128.34:5061
+
+# ==================================================================
+# VERIFICA CONFIGURAZIONE
+# ==================================================================
+
+# Verifica profile creato
+show voip sip profile webapp-monitor
+
+# Verifica trunk creato
+show voip trunk webapp-trunk
+
+# Verifica registrazione
+show voip sip registration
+
+# Verifica route
+show voip route webapp-test
+
+# ==================================================================
+# TEST CHIAMATE QUALITÀ
+# ==================================================================
+
+# Ora puoi chiamare direttamente i numeri test:
+# 999 - Test Qualità Generale (analisi completa MOS)
+# 998 - Test con Rumore (analisi interferenze)
+# 997 - Test Echo/Delay (analisi latenza)
+# 996 - Test Packet Loss (analisi perdita pacchetti)
+
+# ==================================================================
+# VANTAGGI di questa configurazione:
+# ==================================================================
+
+# 1. Profile Welcome Italia rimane INVARIATO
+#    - Continui a usare Welcome Italia normalmente
+#    - Nessuna interruzione del servizio
+
+# 2. Profile WebApp separato e dedicato
+#    - Solo per monitoraggio qualità
+#    - Chiamate test sui numeri 996-999
+
+# 3. Facile abilitazione/disabilitazione
+#    - enable/disable del trunk webapp-trunk
+#    - Nessun impatto su traffico principale
+
+# ==================================================================
+# GESTIONE DUAL-PROFILE
+# ==================================================================
+
+# Chiamate normali: usano profile "welcome" + trunk "welcome1"
+# Chiamate test: usano profile "webapp-monitor" + trunk "webapp-trunk"
+
+# Per disabilitare temporaneamente monitoraggio:
+# set voip trunk sip webapp-trunk enable no
+
+# Per riabilitare:
+# set voip trunk sip webapp-trunk enable yes
+
+# ==================================================================
+# RIMOZIONE COMPLETA (se necessario)
+# ==================================================================
+
+# Per rimuovere completamente la configurazione webapp:
+# set voip route webapp-test enable no
+# set voip trunk sip webapp-trunk enable no
+# set voip trunk sip delete webapp-trunk
+# set voip route delete webapp-test
+# set voip sip profile delete webapp-monitor
