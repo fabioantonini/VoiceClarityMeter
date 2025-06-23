@@ -1,6 +1,27 @@
 # VoIP Quality Monitor - Deployment Ubuntu 22.04
 
-## Installazione Rapida
+## Installazione Locale (Sviluppo/Test)
+
+### Risoluzione Errore Flask
+Se ricevi l'errore `ModuleNotFoundError: No module named 'flask'`:
+
+1. **Attiva ambiente virtuale**
+```bash
+source venv/bin/activate
+```
+
+2. **Usa il nuovo script di installazione locale**
+```bash
+chmod +x install_local.sh
+./install_local.sh
+```
+
+3. **Avvia applicazione**
+```bash
+python app_simple.py
+```
+
+## Installazione Produzione
 
 ### 1. Download dei file
 Scarica tutti i file del progetto dal repository Replit sul tuo PC Ubuntu.
