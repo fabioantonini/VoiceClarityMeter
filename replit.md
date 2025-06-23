@@ -115,6 +115,8 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 
 Preferred communication style: Simple, everyday language (Italian).
 Technical requirements: 
-- Support for both UDP and TCP transport protocols for SIP communication
-- VoIP gateway integration: Asterisk-based gateway with two FXS interfaces for traditional phones
+- Support for UDP, TCP and TLS transport protocols for SIP communication
+- VoIP gateway integration: Welcome Italia Tiesse "Imola" series gateway with CLI configuration
+- Primary codec: G.729 + alaw fallback (Welcome Italia standard)
 - System acts as SIP Registrar and Proxy for gateway device registration and call routing
+- Local deployment on Ubuntu 22.04 for cost and security reasons
