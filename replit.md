@@ -106,6 +106,7 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 21, 2025: Added gateway status monitoring and registered devices display in dashboard
 - June 22, 2025: Prepared complete Ubuntu 22.04 deployment package with automatic installation scripts
 - June 23, 2025: Modified test extensions (999-996) to use real RTP analysis instead of simulation
+- June 23, 2025: Added Opus codec support with automatic detection from RTP payload type and specific MOS calculation parameters
 
 ## User Preferences
 
