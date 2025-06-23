@@ -188,6 +188,136 @@ def get_test_extensions():
         '996': {'name': 'Test Packet Loss', 'simulation': 'packet_loss'}
     })
 
+# Certificate Management API endpoints
+@app.route('/api/certificates/generate-server', methods=['POST'])
+@require_login
+def generate_server_certificates():
+    """Generate server certificates for TLS"""
+    try:
+        data = request.get_json()
+        server_name = data.get('server_name', 'sip-server.local')
+        server_ip = data.get('server_ip')
+        organization = data.get('organization', 'VoIP Monitor')
+        validity_days = data.get('validity_days', 365)
+        
+        # Generate CA certificate first if it doesn't exist
+        ca_cert_path = os.path.join(certificate_manager.cert_dir, "ca-cert.pem")
+        if not os.path.exists(ca_cert_path):
+            certificate_manager.generate_ca_certificate(
+                common_name=f"{organization} CA",
+                organization=organization
+            )
+        
+        # Generate server certificate
+        server_cert_path, server_key_path, server_bundle_path = certificate_manager.generate_server_certificate(
+            server_name=server_name,
+            server_ip=server_ip,
+            validity_days=validity_days
+        )
+        
+        return jsonify({
+            'success': True,
+            'server_cert_file': os.path.basename(server_cert_path),
+            'server_key_file': os.path.basename(server_key_path),
+            'server_bundle_file': os.path.basename(server_bundle_path),
+            'message': 'Server certificates generated successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/certificates/generate-client', methods=['POST'])
+@require_login
+def generate_client_certificate():
+    """Generate client certificate for SIP phone"""
+    try:
+        data = request.get_json()
+        client_name = data.get('client_name', 'sip-client')
+        extension = data.get('extension', '201')
+        validity_days = data.get('validity_days', 365)
+        
+        # Generate client certificate
+        client_cert_path, client_key_path, client_p12_path = certificate_manager.generate_client_certificate(
+            client_name=client_name,
+            extension=extension,
+            validity_days=validity_days
+        )
+        
+        result = {
+            'success': True,
+            'client_cert_file': os.path.basename(client_cert_path),
+            'client_key_file': os.path.basename(client_key_path),
+            'message': f'Client certificate for {client_name}-{extension} generated successfully'
+        }
+        
+        if client_p12_path:
+            result['client_p12_file'] = os.path.basename(client_p12_path)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/certificates/list')
+@require_login
+def list_certificates():
+    """List all certificates"""
+    try:
+        certificates = certificate_manager.list_certificates()
+        return jsonify(certificates)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/certificates/info/<filename>')
+@require_login
+def get_certificate_info(filename):
+    """Get certificate information"""
+    try:
+        cert_path = os.path.join(certificate_manager.cert_dir, filename)
+        if not os.path.exists(cert_path):
+            return jsonify({'error': 'Certificate not found'}), 404
+            
+        cert_info = certificate_manager.get_certificate_info(cert_path)
+        return jsonify(cert_info)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/certificates/download/<filename>')
+@require_login  
+def download_certificate(filename):
+    """Download certificate file"""
+    try:
+        from flask import send_from_directory
+        return send_from_directory(
+            certificate_manager.cert_dir, 
+            filename, 
+            as_attachment=True
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/certificates/delete/<filename>', methods=['DELETE'])
+@require_login
+def delete_certificate(filename):
+    """Delete certificate file"""
+    try:
+        # Extract base name (remove extensions and suffixes)
+        base_name = filename.replace('-cert.pem', '').replace('-private-key.pem', '').replace('-bundle.pem', '').replace('.p12', '')
+        
+        deleted_files = certificate_manager.delete_certificate_files(base_name)
+        
+        if deleted_files:
+            return jsonify({
+                'success': True,
+                'deleted_files': deleted_files,
+                'message': f'Certificate {base_name} deleted successfully'
+            })
+        else:
+            return jsonify({'error': 'No files found to delete'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # WebSocket handlers
 @socketio.on('connect')
 def handle_connect():

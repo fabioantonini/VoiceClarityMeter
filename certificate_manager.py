@@ -140,11 +140,12 @@ class CertificateManager:
             x509.DNSName(socket.gethostname()),
         ]
         
-        # Add IP addresses
+        # Add IP addresses to SAN list
         try:
             san_list.append(x509.IPAddress(ipaddress.ip_address(server_ip)))
             san_list.append(x509.IPAddress(ipaddress.ip_address("127.0.0.1")))
-        except:
+        except ValueError:
+            # Skip invalid IP addresses
             pass
         
         server_cert = x509.CertificateBuilder().subject_name(
@@ -180,8 +181,8 @@ class CertificateManager:
             critical=True,
         ).add_extension(
             x509.ExtendedKeyUsage([
-                x509.oid.ExtendedKeyUsageOID.SERVER_AUTH,
-                x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
+                x509.ExtendedKeyUsageOID.SERVER_AUTH,
+                x509.ExtendedKeyUsageOID.CLIENT_AUTH,
             ]),
             critical=True,
         ).sign(ca_private_key, hashes.SHA256())
