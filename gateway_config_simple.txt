@@ -1,0 +1,60 @@
+# Configurazione Gateway Tiesse Imola - VoIP Quality Monitor
+# Comandi CLI per collegare il gateway alla WebApp con autenticazione
+
+# ==============================================================
+# STEP 1: Crea Profile SIP per WebApp
+# ==============================================================
+set voip sip profile create webapp-monitor
+set voip sip profile webapp-monitor registrar 172.31.128.34:5060
+set voip sip profile webapp-monitor outbound-proxy 172.31.128.34:5060
+set voip sip profile webapp-monitor sip-domain voip-monitor.local
+set voip sip profile webapp-monitor codec-type g729 alaw ulaw
+set voip sip profile webapp-monitor dtmf rfc4733
+set voip sip profile webapp-monitor registration-expiry 3600
+
+# ==============================================================
+# STEP 2: Crea Trunk SIP con Autenticazione
+# ==============================================================
+set voip trunk sip create webapp-trunk
+set voip trunk sip webapp-trunk username gateway-monitor
+set voip trunk sip webapp-trunk authentication-username gateway-monitor
+set voip trunk sip webapp-trunk authentication-password VoipQuality2025!
+set voip trunk sip webapp-trunk display-name "Gateway Monitor"
+set voip trunk sip webapp-trunk codec-type g729 alaw ulaw
+set voip trunk sip webapp-trunk dtmf rfc4733
+set voip trunk sip webapp-trunk sip-profile webapp-monitor
+set voip trunk sip webapp-trunk enable yes
+
+# ==============================================================
+# STEP 3: Crea Route per Numeri Test
+# ==============================================================
+set voip route create webapp-test
+set voip route webapp-test destination-pattern 99[6-9]
+set voip route webapp-test trunk webapp-trunk
+set voip route webapp-test enable yes
+
+# ==============================================================
+# STEP 4: Verifica Configurazione
+# ==============================================================
+show voip sip registration
+show voip trunk webapp-trunk
+show voip route webapp-test
+
+# ==============================================================
+# RISULTATO ATTESO
+# ==============================================================
+# - Gateway registrato con username "gateway-monitor"
+# - Numeri 996, 997, 998, 999 instradati verso WebApp
+# - Dashboard disponibile: http://172.31.128.34:5000/dashboard
+# - Credenziali visibili nella dashboard per riferimento
+
+# ==============================================================
+# TEST CHIAMATE
+# ==============================================================
+# Chiamare dal telefono collegato al gateway:
+# 999 - Test Qualità Audio con analisi RTP reale
+# 998 - Test con Rumore e disturbi
+# 997 - Test Echo e Delay
+# 996 - Test Packet Loss
+
+# Monitoraggio in tempo reale nella dashboard WebApp
