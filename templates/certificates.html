@@ -48,6 +48,227 @@
                             I certificati verranno scaricati e installati manualmente sui client SIP.
                         </div>
                         
+                        <!-- Certificate Explanation Section -->
+                        <div class="accordion mb-3" id="certificateExplanation">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#explanationCollapse">
+                                        <i class="fas fa-question-circle me-2"></i>
+                                        <strong>Spiegazione dei Certificati TLS</strong>
+                                    </button>
+                                </h2>
+                                <div id="explanationCollapse" class="accordion-collapse collapse" data-bs-parent="#certificateExplanation">
+                                    <div class="accordion-body">
+                                        <h6><i class="fas fa-certificate text-primary me-2"></i>Tipi di Certificati e loro Uso:</h6>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card border-primary mb-3">
+                                                    <div class="card-header bg-primary text-white">
+                                                        <strong>1. Certificate Authority (CA)</strong>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p><strong>File:</strong> <code>ca-cert.pem</code>, <code>ca-private-key.pem</code></p>
+                                                        <p><strong>Scopo:</strong> Il certificato "radice" che firma tutti gli altri certificati</p>
+                                                        <p><strong>Uso:</strong> 
+                                                        <ul>
+                                                            <li>Installa <code>ca-cert.pem</code> sui client SIP come "Autorità Fidata"</li>
+                                                            <li>Permette ai client di verificare l'autenticità del server</li>
+                                                            <li>Il file <code>ca-private-key.pem</code> rimane solo sul server</li>
+                                                        </ul>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <div class="card border-success mb-3">
+                                                    <div class="card-header bg-success text-white">
+                                                        <strong>2. Server Certificate</strong>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p><strong>File:</strong> <code>sip-server.local-cert.pem</code>, <code>sip-server.local-private-key.pem</code></p>
+                                                        <p><strong>Scopo:</strong> Identifica il server SIP in modo sicuro</p>
+                                                        <p><strong>Uso:</strong>
+                                                        <ul>
+                                                            <li>Utilizzato automaticamente dal server TLS porta 5061</li>
+                                                            <li>Contiene il nome del server (sip-server.local) e l'IP</li>
+                                                            <li>I client verificano questo certificato durante la connessione</li>
+                                                        </ul>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card border-warning mb-3">
+                                                    <div class="card-header bg-warning text-dark">
+                                                        <strong>3. Client Certificate</strong>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p><strong>File:</strong> <code>client-XXX-cert.pem</code>, <code>client-XXX-private-key.pem</code></p>
+                                                        <p><strong>Scopo:</strong> Identifica un client SIP specifico (telefono/softphone)</p>
+                                                        <p><strong>Uso:</strong>
+                                                        <ul>
+                                                            <li>Installa sui telefoni SIP per autenticazione forte</li>
+                                                            <li>Ogni estensione può avere il proprio certificato</li>
+                                                            <li>Permette al server di identificare il client in modo sicuro</li>
+                                                        </ul>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <div class="card border-info mb-3">
+                                                    <div class="card-header bg-info text-white">
+                                                        <strong>4. Formati File (.pem, .p12)</strong>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p><strong>.pem:</strong> Formato testo, compatibile con la maggior parte dei sistemi</p>
+                                                        <p><strong>.p12:</strong> Formato binario che contiene certificato + chiave privata insieme</p>
+                                                        <p><strong>Bundle:</strong> File che contiene certificato + CA per installazione semplificata</p>
+                                                        <div class="alert alert-warning">
+                                                            <small><i class="fas fa-exclamation-triangle me-1"></i>
+                                                            <strong>Sicurezza:</strong> Le chiavi private non devono mai essere condivise o trasmesse in modo non sicuro
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-primary">
+                                            <h6><i class="fas fa-lightbulb me-2"></i>Processo di Installazione Tipico:</h6>
+                                            <ol>
+                                                <li><strong>Server:</strong> I certificati server vengono utilizzati automaticamente dal sistema</li>
+                                                <li><strong>Client SIP:</strong> Installa il certificato CA come "autorità fidata"</li>
+                                                <li><strong>Autenticazione Client:</strong> Opzionalmente, installa il certificato client per autenticazione forte</li>
+                                                <li><strong>Configurazione:</strong> Configura il client per utilizzare porta 5061 con TLS</li>
+                                            </ol>
+                                        </div>
+                                        
+                                        <!-- Practical Configuration Examples -->
+                                        <div class="card border-secondary mt-3">
+                                            <div class="card-header bg-secondary text-white">
+                                                <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Esempi di Configurazione Client</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6><i class="fas fa-mobile-alt text-success me-2"></i>Softphone (es. Linphone, Zoiper)</h6>
+                                                        <div class="bg-light p-2 rounded">
+                                                            <small>
+                                                                <strong>Server SIP:</strong> sip-server.local:5061<br>
+                                                                <strong>Trasporto:</strong> TLS<br>
+                                                                <strong>Certificato CA:</strong> Importa ca-cert.pem<br>
+                                                                <strong>Verifica server:</strong> Abilitata<br>
+                                                                <strong>Certificato client:</strong> Opzionale (.p12)
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6><i class="fas fa-phone text-primary me-2"></i>Telefono IP Hardware</h6>
+                                                        <div class="bg-light p-2 rounded">
+                                                            <small>
+                                                                <strong>Proxy SIP:</strong> sip-server.local<br>
+                                                                <strong>Porta:</strong> 5061<br>
+                                                                <strong>Protocollo:</strong> TLS/SIPS<br>
+                                                                <strong>Root CA:</strong> Carica ca-cert.pem<br>
+                                                                <strong>Validazione:</strong> Strict
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="alert alert-success mt-3">
+                                                    <small>
+                                                        <i class="fas fa-check-circle me-2"></i>
+                                                        <strong>Nota:</strong> Dopo l'installazione del certificato CA, le connessioni TLS saranno automaticamente verificate e sicure. 
+                                                        I certificati client aggiungono un ulteriore livello di sicurezza per l'autenticazione.
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Technical PKI Explanation -->
+                                        <div class="card border-dark mt-3">
+                                            <div class="card-header bg-dark text-white">
+                                                <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Logica PKI e Catena di Fiducia</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <h6>Flusso di Autenticazione TLS:</h6>
+                                                        <ol class="small">
+                                                            <li><strong>Handshake TLS:</strong> Il client si connette al server sulla porta 5061</li>
+                                                            <li><strong>Presentazione Certificato:</strong> Il server presenta il suo certificato (sip-server.local-cert.pem)</li>
+                                                            <li><strong>Verifica Firma:</strong> Il client verifica che il certificato sia firmato dal CA installato</li>
+                                                            <li><strong>Verifica Identità:</strong> Il client controlla che il nome del server corrisponda (sip-server.local)</li>
+                                                            <li><strong>Scambio Chiavi:</strong> Viene stabilita una sessione crittografata temporanea</li>
+                                                            <li><strong>Autenticazione Client (Opzionale):</strong> Il server può richiedere il certificato client</li>
+                                                        </ol>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="bg-light p-2 rounded text-center">
+                                                            <div class="mb-2">
+                                                                <i class="fas fa-certificate text-primary fa-2x"></i>
+                                                                <br><small><strong>CA Root</strong></small>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <i class="fas fa-arrow-down text-muted"></i>
+                                                                <br><small>firma</small>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <i class="fas fa-server text-success fa-2x"></i>
+                                                                <br><small><strong>Server Cert</strong></small>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <i class="fas fa-shield-alt text-warning fa-2x"></i>
+                                                                <br><small><strong>TLS Session</strong></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="alert alert-info mt-3">
+                                                    <h6><i class="fas fa-key me-2"></i>Crittografia e Sicurezza:</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <small>
+                                                                <strong>Algoritmi:</strong> RSA 2048-bit, SHA-256<br>
+                                                                <strong>Cifrario TLS:</strong> AES-256-GCM<br>
+                                                                <strong>Scambio Chiavi:</strong> X25519 (Curve25519)
+                                                            </small>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <small>
+                                                                <strong>Validità:</strong> 1 anno (rinnovabile)<br>
+                                                                <strong>SAN:</strong> IP + DNS alternativi<br>
+                                                                <strong>Uso:</strong> Server + Client Authentication
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="alert alert-warning">
+                                                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Considerazioni di Sicurezza:</h6>
+                                                    <ul class="small mb-0">
+                                                        <li><strong>Certificati Auto-firmati:</strong> Validi per test e reti private, ma non riconosciuti pubblicamente</li>
+                                                        <li><strong>Protezione Chiavi Private:</strong> Mantieni i file .pem delle chiavi private sicuri e non condividerli</li>
+                                                        <li><strong>Scadenza:</strong> Monitora la scadenza dei certificati e rinnovali tempestivamente</li>
+                                                        <li><strong>Revoca:</strong> In caso di compromissione, rigenera tutti i certificati della catena</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <h6 class="fw-bold">Genera Nuovi Certificati</h6>
