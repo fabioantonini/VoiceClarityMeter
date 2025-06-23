@@ -1,0 +1,112 @@
+# Configurazione Gateway Welcome Italia per VoIP Quality Monitor LOCALE
+# Data: 2025-06-23 15:08:00
+
+# ==================================================================
+# CONFIGURAZIONE PER MONITORAGGIO QUALITÀ LOCALE
+# Gateway Welcome Italia -> Webapp Locale
+# ==================================================================
+
+# IMPORTANTE: Sostituisci <IP_PC_LOCALE> con l'IP del tuo PC Linux
+# Esempio: 192.168.1.50, 10.0.0.100, etc.
+
+# Backup configurazione originale (per ripristino rapido)
+# set voip sip profile welcome registrar proxy01-sip.welcomeitalia.it
+
+# Nuova configurazione: webapp locale come registrar
+set voip sip profile welcome registrar <IP_PC_LOCALE>:5060
+set voip sip profile welcome outbound-proxy <IP_PC_LOCALE>:5060
+set voip sip profile welcome sip-domain voip-monitor.local
+
+# Mantieni configurazione codec Welcome Italia (ottimale)
+set voip sip profile welcome codec-type g729 alaw
+set voip sip profile welcome dtmf rfc4733
+set voip sip profile welcome registration-expiry 3600
+set voip sip profile welcome registration-retry-timer 57
+
+# Funzioni per monitoraggio qualità
+set voip sip profile welcome caller-rewrite yes
+set voip sip profile welcome rfc3325-header preferred
+set voip sip profile welcome enable-prack supported
+
+# Configurazione trunk esistente (MANTIENI INVARIATA)
+set voip trunk sip welcome1 username 08631780017
+set voip trunk sip welcome1 authentication-password WLC40808S117L1
+set voip trunk sip welcome1 codec-type g729 alaw
+set voip trunk sip welcome1 authentication-username s08631780017
+set voip trunk sip welcome1 display-name 08631780017
+set voip trunk sip welcome1 dtmf rfc4733
+set voip trunk sip welcome1 sip-profile welcome
+set voip trunk sip welcome1 enable yes
+
+# ==================================================================
+# CONFIGURAZIONE OPZIONALE TLS (per sicurezza maggiore)
+# ==================================================================
+
+# Se vuoi usare TLS (SIPS) per sicurezza:
+# set voip sip profile welcome transport-protocol tls
+# set voip sip profile welcome registrar <IP_PC_LOCALE>:5061
+
+# ==================================================================
+# SETUP AMBIENTE LOCALE
+# ==================================================================
+
+# 1. Sul tuo PC Linux, verifica IP locale:
+#    ip addr show | grep inet
+#    hostname -I
+
+# 2. Assicurati che il firewall consenta connessioni:
+#    sudo ufw allow 5000  # Dashboard web
+#    sudo ufw allow 5060  # SIP server
+#    sudo ufw allow 5061  # SIP TLS (opzionale)
+
+# 3. Avvia webapp:
+#    source venv/bin/activate
+#    python app_simple.py
+
+# 4. Verifica funzionamento:
+#    http://localhost:5000  (dal PC locale)
+#    http://<IP_PC_LOCALE>:5000  (da altri dispositivi rete)
+
+# ==================================================================
+# VERIFICA CONFIGURAZIONE
+# ==================================================================
+
+# Dal gateway, verifica registrazione:
+show voip sip registration
+show voip trunk status
+
+# Dal PC, verifica logs webapp per registrazione gateway
+
+# Test chiamate di qualità:
+# Chiama: 999 (Test Qualità Generale)
+# Chiama: 998 (Test con Rumore)
+# Chiama: 997 (Test Echo/Delay)
+# Chiama: 996 (Test Packet Loss)
+
+# ==================================================================
+# RIPRISTINO VELOCE
+# ==================================================================
+
+# Per tornare alla configurazione originale Welcome Italia:
+# set voip sip profile welcome registrar proxy01-sip.welcomeitalia.it
+# set voip sip profile welcome sip-domain welcomeitalia.it
+
+# ==================================================================
+# TROUBLESHOOTING LOCALE
+# ==================================================================
+
+# Gateway non si registra:
+# 1. Verifica IP PC: hostname -I
+# 2. Verifica webapp attiva: netstat -tlnp | grep 5060
+# 3. Verifica firewall: sudo ufw status
+# 4. Test ping dal gateway al PC
+
+# Webapp non riceve registrazioni:
+# 1. Controlla logs webapp per errori SIP
+# 2. Verifica porta 5060 libera: sudo lsof -i :5060
+# 3. Test con client SIP softphone
+
+# Chiamate non funzionano:
+# 1. Verifica routing SIP nella webapp
+# 2. Controlla che RTP passi attraverso PC
+# 3. Verifica analisi qualità in dashboard

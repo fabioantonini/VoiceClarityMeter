@@ -1,0 +1,65 @@
+# Configurazione Gateway Welcome Italia per VoIP Quality Monitor
+# IP PC Locale: 172.31.128.34
+# Data: 2025-06-23 15:10:17
+
+# ==================================================================
+# BACKUP CONFIGURAZIONE ORIGINALE
+# ==================================================================
+# set voip sip profile welcome registrar proxy01-sip.welcomeitalia.it
+# set voip sip profile welcome sip-domain welcomeitalia.it
+
+# ==================================================================
+# CONFIGURAZIONE LOCALE - VoIP Quality Monitor
+# ==================================================================
+
+# Configurazione SIP Profile per webapp locale
+set voip sip profile welcome registrar 172.31.128.34:5060
+set voip sip profile welcome outbound-proxy 172.31.128.34:5060
+set voip sip profile welcome sip-domain voip-monitor.local
+
+# Mantieni configurazione codec Welcome Italia (ottimale)
+set voip sip profile welcome codec-type g729 alaw
+set voip sip profile welcome dtmf rfc4733
+set voip sip profile welcome registration-expiry 3600
+set voip sip profile welcome registration-retry-timer 57
+
+# Configurazioni per monitoraggio qualità
+set voip sip profile welcome caller-rewrite yes
+set voip sip profile welcome rfc3325-header preferred
+set voip sip profile welcome enable-prack supported
+
+# ==================================================================
+# CONFIGURAZIONE TRUNK (MANTIENI ESISTENTE)
+# ==================================================================
+
+set voip trunk sip welcome1 username 08631780017
+set voip trunk sip welcome1 authentication-password WLC40808S117L1
+set voip trunk sip welcome1 codec-type g729 alaw
+set voip trunk sip welcome1 authentication-username s08631780017
+set voip trunk sip welcome1 display-name 08631780017
+set voip trunk sip welcome1 dtmf rfc4733
+set voip trunk sip welcome1 sip-profile welcome
+set voip trunk sip welcome1 enable yes
+
+# ==================================================================
+# VERIFICA E TEST
+# ==================================================================
+
+# Verifica registrazione gateway
+show voip sip registration
+show voip trunk status
+
+# Test chiamate qualità (dopo configurazione)
+# Numero 999: Test Qualità Generale
+# Numero 998: Test con Rumore
+# Numero 997: Test Echo/Delay  
+# Numero 996: Test Packet Loss
+
+# ==================================================================
+# RIPRISTINO RAPIDO
+# ==================================================================
+
+# Per tornare alla configurazione originale Welcome Italia:
+# set voip sip profile welcome registrar proxy01-sip.welcomeitalia.it
+# set voip sip profile welcome sip-domain welcomeitalia.it
+
