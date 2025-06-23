@@ -3,10 +3,12 @@ SIP Registrar and Proxy for VoIP Gateway with FXS interfaces
 Handles registration and call routing for Asterisk-based gateways
 """
 import socket
+import ssl
 import threading
 import re
 import select
 import time
+import os
 from datetime import datetime, timedelta
 from rtp_processor import RTPProcessor
 
@@ -47,9 +49,14 @@ class SIPRegistrar:
         try:
             self.start_udp_server()
             self.start_tcp_server()
+            self.start_tls_server()
             
             print(f"SIP Registrar listening on UDP {self.host}:{self.udp_port}")
             print(f"SIP Registrar listening on TCP {self.host}:{self.tcp_port}")
+            if self.tls_socket:
+                print(f"SIP Registrar listening on TLS {self.host}:{self.tls_port}")
+            else:
+                print(f"TLS not available - certificates not found")
             
             self.running = True
             
@@ -77,13 +84,45 @@ class SIPRegistrar:
         self.tcp_socket.bind((self.host, self.tcp_port))
         self.tcp_socket.listen(5)
         self.tcp_socket.setblocking(False)
+
+    def start_tls_server(self):
+        """Initialize TLS socket with SSL context"""
+        try:
+            # Check if certificates exist
+            cert_dir = "certificates"
+            cert_file = os.path.join(cert_dir, "sip-server.local-cert.pem")
+            key_file = os.path.join(cert_dir, "sip-server.local-private-key.pem")
+            
+            if not os.path.exists(cert_file) or not os.path.exists(key_file):
+                print("TLS certificates not found - TLS server not started")
+                print("Generate certificates at /certificates to enable TLS")
+                return
+                
+            # Create SSL context
+            self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            self.ssl_context.load_cert_chain(cert_file, key_file)
+            
+            # Create TLS socket
+            self.tls_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.tls_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.tls_socket.bind((self.host, self.tls_port))
+            self.tls_socket.listen(5)
+            self.tls_socket.setblocking(False)
+            
+        except Exception as e:
+            print(f"Error starting TLS server: {e}")
+            self.tls_socket = None
+            self.ssl_context = None
         
     def server_loop(self):
-        """Main server loop handling UDP and TCP"""
+        """Main server loop handling UDP, TCP and TLS"""
         while self.running:
             try:
                 read_sockets = [self.udp_socket, self.tcp_socket]
+                if self.tls_socket:
+                    read_sockets.append(self.tls_socket)
                 read_sockets.extend(self.tcp_connections.keys())
+                read_sockets.extend(self.tls_connections.keys())
                 
                 ready_sockets, _, error_sockets = select.select(read_sockets, [], read_sockets, 1.0)
                 
@@ -92,12 +131,18 @@ class SIPRegistrar:
                         self.handle_udp_data()
                     elif sock == self.tcp_socket:
                         self.handle_new_tcp_connection()
+                    elif sock == self.tls_socket:
+                        self.handle_new_tls_connection()
                     elif sock in self.tcp_connections:
                         self.handle_tcp_data(sock)
+                    elif sock in self.tls_connections:
+                        self.handle_tls_data(sock)
                         
                 for sock in error_sockets:
                     if sock in self.tcp_connections:
                         self.close_tcp_connection(sock)
+                    elif sock in self.tls_connections:
+                        self.close_tls_connection(sock)
                         
             except Exception as e:
                 print(f"Error in registrar loop: {e}")
@@ -127,6 +172,22 @@ class SIPRegistrar:
             print(f"New TCP connection from gateway at {addr}")
         except socket.error:
             pass
+
+    def handle_new_tls_connection(self):
+        """Handle new TLS connection"""
+        try:
+            client_socket, addr = self.tls_socket.accept()
+            # Wrap socket with SSL
+            ssl_socket = self.ssl_context.wrap_socket(client_socket, server_side=True)
+            ssl_socket.setblocking(False)
+            self.tls_connections[ssl_socket] = {
+                'addr': addr,
+                'buffer': b'',
+                'transport': 'TLS'
+            }
+            print(f"New TLS connection from {addr}")
+        except Exception as e:
+            print(f"Error accepting TLS connection: {e}")
             
     def handle_tcp_data(self, client_socket):
         """Handle data from TCP connection"""
@@ -185,6 +246,66 @@ class SIPRegistrar:
             print(f"Closing TCP connection from {addr}")
             client_socket.close()
             del self.tcp_connections[client_socket]
+        except:
+            pass
+
+    def handle_tls_data(self, client_socket):
+        """Handle data from TLS connection"""
+        try:
+            data = client_socket.recv(4096)
+            if not data:
+                self.close_tls_connection(client_socket)
+                return
+                
+            conn_info = self.tls_connections[client_socket]
+            conn_info['buffer'] += data
+            
+            # Process complete SIP messages
+            self.process_tls_buffer(client_socket)
+            
+        except ssl.SSLWantReadError:
+            # SSL handshake in progress, continue
+            pass
+        except Exception as e:
+            print(f"Error handling TLS data: {e}")
+            self.close_tls_connection(client_socket)
+
+    def process_tls_buffer(self, client_socket):
+        """Process buffered TLS data for complete SIP messages"""
+        conn_info = self.tls_connections[client_socket]
+        buffer = conn_info['buffer']
+        
+        while b'\r\n\r\n' in buffer:
+            # Find end of headers
+            headers_end = buffer.find(b'\r\n\r\n') + 4
+            headers_data = buffer[:headers_end]
+            
+            # Check for Content-Length
+            content_length = self.extract_content_length(headers_data)
+            total_length = headers_end + content_length
+            
+            if len(buffer) >= total_length:
+                # Complete SIP message
+                message = buffer[:total_length]
+                buffer = buffer[total_length:]
+                
+                threading.Thread(
+                    target=self.handle_sip_message,
+                    args=(message, conn_info['addr'], 'TLS', client_socket),
+                    daemon=True
+                ).start()
+            else:
+                break
+                
+        conn_info['buffer'] = buffer
+
+    def close_tls_connection(self, client_socket):
+        """Close TLS connection"""
+        try:
+            addr = self.tls_connections[client_socket]['addr']
+            print(f"Closing TLS connection from {addr}")
+            client_socket.close()
+            del self.tls_connections[client_socket]
         except:
             pass
             
