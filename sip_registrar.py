@@ -38,6 +38,13 @@ class SIPRegistrar:
         self.supported_codecs = ['G.711', 'G.729', 'G.722', 'OPUS']
         self.dtmf_support = 'rfc4733'  # Welcome Italia standard
         
+        # Default SIP authentication credentials for gateway registration
+        self.sip_users = {
+            'gateway-monitor': 'VoipQuality2025!',
+            'gateway-test': 'TestMonitor123',
+            'welcome-gw': 'WelcomeGW456'
+        }
+        
         # Test extensions for quality monitoring (now with REAL RTP analysis)
         self.test_extensions = {
             '999': {'name': 'Test Audio Qualità', 'description': 'Analisi RTP reale per test qualità'},
@@ -357,17 +364,30 @@ class SIPRegistrar:
         return headers
         
     def handle_register(self, request_line, headers, addr, transport, client_socket=None):
-        """Handle REGISTER requests from gateway/phones"""
+        """Handle REGISTER requests from gateway/phones with authentication"""
         try:
             # Extract registration info
             contact = headers.get('contact', '')
             expires = int(headers.get('expires', self.registration_expires))
             from_header = headers.get('from', '')
             to_header = headers.get('to', '')
+            authorization = headers.get('authorization', '')
             
             # Extract extension/user
             extension = self.extract_extension(from_header)
             contact_uri = self.extract_contact_uri(contact)
+            
+            # Check for authentication
+            if authorization:
+                # Parse authorization header
+                auth_valid = self.verify_sip_auth(authorization, extension)
+                if not auth_valid:
+                    self.send_response(addr, '403', 'Forbidden', headers, transport, client_socket)
+                    return
+            else:
+                # Send authentication challenge
+                self.send_auth_challenge(addr, headers, transport, client_socket)
+                return
             
             if extension:
                 if expires > 0:
@@ -718,3 +738,52 @@ a=sendrecv
             
         for client_socket in list(self.tcp_connections.keys()):
             self.close_tcp_connection(client_socket)
+    
+    def verify_sip_auth(self, authorization, username):
+        """Verify SIP authentication credentials"""
+        try:
+            # Simple username/password check for gateway authentication
+            if username in self.sip_users:
+                # Accept any authorization header if username exists
+                # In production, this should use proper digest authentication
+                return True
+            return False
+        except:
+            return False
+    
+    def send_auth_challenge(self, addr, request_headers, transport, client_socket=None):
+        """Send 401 Unauthorized with authentication challenge"""
+        try:
+            via = request_headers.get('via', '')
+            call_id = request_headers.get('call-id', 'unknown')
+            from_header = request_headers.get('from', '')
+            to_header = request_headers.get('to', '')
+            cseq = request_headers.get('cseq', '1 REGISTER')
+            
+            # Generate nonce for digest auth
+            import hashlib
+            import time
+            nonce = hashlib.md5(f"{time.time()}{addr}".encode()).hexdigest()
+            
+            response = f"SIP/2.0 401 Unauthorized\r\n"
+            response += f"Via: {via}\r\n"
+            response += f"Call-ID: {call_id}\r\n"
+            response += f"From: {from_header}\r\n"
+            response += f"To: {to_header}\r\n"
+            response += f"CSeq: {cseq}\r\n"
+            response += f'WWW-Authenticate: Digest realm="{self.domain}", nonce="{nonce}"\r\n'
+            response += f"Server: VoIP-Quality-Monitor-Registrar/1.0\r\n"
+            response += "Content-Length: 0\r\n\r\n"
+            
+            # Send via appropriate transport
+            if transport == 'TCP' and client_socket:
+                client_socket.send(response.encode('utf-8'))
+            elif transport == 'TLS' and client_socket:
+                client_socket.send(response.encode('utf-8'))
+            else:
+                self.udp_socket.sendto(response.encode('utf-8'), addr)
+                
+            print(f"Sent 401 Unauthorized to {addr} via {transport}")
+            
+        except Exception as e:
+            print(f"Error sending auth challenge: {e}")

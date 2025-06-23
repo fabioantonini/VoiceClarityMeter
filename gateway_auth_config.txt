@@ -1,0 +1,119 @@
+# Configurazione Gateway Welcome Italia con Autenticazione SIP
+# WebApp VoIP Quality Monitor - Credenziali Attive
+# Data: 2025-06-23
+
+# ==================================================================
+# CREDENZIALI SIP DISPONIBILI NELLA WEBAPP
+# ==================================================================
+
+# Username: gateway-monitor    Password: VoipQuality2025!
+# Username: gateway-test       Password: TestMonitor123  
+# Username: welcome-gw         Password: WelcomeGW456
+
+# Scegli una delle combinazioni sopra per il tuo gateway
+
+# ==================================================================
+# PROFILE SIP con AUTENTICAZIONE
+# ==================================================================
+
+# Crea profile dedicato webapp con autenticazione
+set voip sip profile create webapp-monitor
+set voip sip profile webapp-monitor registrar 172.31.128.34:5060
+set voip sip profile webapp-monitor outbound-proxy 172.31.128.34:5060
+set voip sip profile webapp-monitor sip-domain voip-monitor.local
+
+# Codec e configurazioni
+set voip sip profile webapp-monitor codec-type g729 alaw ulaw
+set voip sip profile webapp-monitor dtmf rfc4733
+set voip sip profile webapp-monitor registration-expiry 3600
+set voip sip profile webapp-monitor registration-retry-timer 60
+set voip sip profile webapp-monitor caller-rewrite yes
+set voip sip profile webapp-monitor rfc3325-header preferred
+set voip sip profile webapp-monitor enable-prack supported
+
+# ==================================================================
+# TRUNK SIP con CREDENZIALI (scegli una opzione)
+# ==================================================================
+
+# OPZIONE 1: Username "gateway-monitor"
+set voip trunk sip create webapp-trunk
+set voip trunk sip webapp-trunk username gateway-monitor
+set voip trunk sip webapp-trunk authentication-username gateway-monitor
+set voip trunk sip webapp-trunk authentication-password VoipQuality2025!
+set voip trunk sip webapp-trunk display-name "Gateway Monitor"
+set voip trunk sip webapp-trunk codec-type g729 alaw ulaw
+set voip trunk sip webapp-trunk dtmf rfc4733
+set voip trunk sip webapp-trunk sip-profile webapp-monitor
+set voip trunk sip webapp-trunk enable yes
+
+# OPZIONE 2: Username "welcome-gw" (alternativa)
+# set voip trunk sip create webapp-trunk
+# set voip trunk sip webapp-trunk username welcome-gw
+# set voip trunk sip webapp-trunk authentication-username welcome-gw
+# set voip trunk sip webapp-trunk authentication-password WelcomeGW456
+# set voip trunk sip webapp-trunk display-name "Welcome Gateway"
+# set voip trunk sip webapp-trunk codec-type g729 alaw ulaw
+# set voip trunk sip webapp-trunk dtmf rfc4733
+# set voip trunk sip webapp-trunk sip-profile webapp-monitor
+# set voip trunk sip webapp-trunk enable yes
+
+# ==================================================================
+# ROUTING per CHIAMATE TEST
+# ==================================================================
+
+# Route numeri 996-999 verso webapp
+set voip route create webapp-test
+set voip route webapp-test destination-pattern 99[6-9]
+set voip route webapp-test trunk webapp-trunk
+set voip route webapp-test enable yes
+
+# ==================================================================
+# VERIFICA REGISTRAZIONE
+# ==================================================================
+
+# Controlla registrazione con autenticazione
+show voip sip registration
+show voip trunk webapp-trunk
+
+# Dovresti vedere la registrazione autenticata nella webapp dashboard
+
+# ==================================================================
+# TEST CHIAMATE
+# ==================================================================
+
+# Dopo registrazione confermata:
+# 999 - Test Qualità Generale
+# 998 - Test con Rumore
+# 997 - Test Echo/Delay
+# 996 - Test Packet Loss
+
+# Dashboard: http://172.31.128.34:5000/dashboard
+
+# ==================================================================
+# TROUBLESHOOTING
+# ==================================================================
+
+# Se registrazione fallisce:
+# 1. Verifica credenziali (username/password corretti)
+# 2. Controlla IP webapp (172.31.128.34)
+# 3. Verifica webapp attiva: curl http://172.31.128.34:5000
+# 4. Controlla logs webapp per errori autenticazione
+
+# Se chiamate non funzionano:
+# 1. Verifica registrazione: show voip sip registration
+# 2. Verifica route: show voip route webapp-test
+# 3. Test manuale: chiama 999 da telefono collegato al gateway
+
+# ==================================================================
+# RIPRISTINO
+# ==================================================================
+
+# Per disabilitare temporaneamente:
+# set voip trunk sip webapp-trunk enable no
+
+# Per rimuovere completamente:
+# set voip route webapp-test enable no
+# set voip trunk sip webapp-trunk enable no
+# set voip trunk sip delete webapp-trunk
+# set voip route delete webapp-test
+# set voip sip profile delete webapp-monitor
