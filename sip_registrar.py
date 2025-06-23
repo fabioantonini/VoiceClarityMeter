@@ -198,6 +198,9 @@ class SIPRegistrar:
             
             print(f"Received SIP {transport} from {addr}: {request_line}")
             
+            # Broadcast SIP message to dashboard
+            self.broadcast_sip_message(message, addr, transport, 'incoming')
+            
             # Route based on SIP method
             if request_line.startswith('REGISTER'):
                 self.handle_register(request_line, headers, addr, transport, client_socket)

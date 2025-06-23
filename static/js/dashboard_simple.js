@@ -37,6 +37,10 @@ class Dashboard {
             this.socket.on('status', (data) => {
                 this.showStatus(data.message, 'info');
             });
+            
+            this.socket.on('sip_message', (data) => {
+                this.addSipMessage(data);
+            });
         } catch (error) {
             console.error('WebSocket connection failed:', error);
             this.setupPolling();
@@ -284,12 +288,68 @@ class Dashboard {
         console.log(`Status (${type}): ${message}`);
         // Could add toast notifications here if needed
     }
+    
+    addSipMessage(data) {
+        const sipContainer = document.getElementById('sipMessages');
+        const isFirstMessage = sipContainer.querySelector('.text-muted');
+        
+        if (isFirstMessage) {
+            sipContainer.innerHTML = '';
+        }
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'sip-message mb-2 p-2 border-start border-3';
+        
+        // Color coding based on message type
+        let borderColor = 'border-secondary';
+        if (data.direction === 'incoming') {
+            borderColor = 'border-success';
+        } else if (data.direction === 'outgoing') {
+            borderColor = 'border-primary';
+        }
+        
+        messageDiv.className += ` ${borderColor}`;
+        
+        const timestamp = new Date(data.timestamp).toLocaleTimeString();
+        const direction = data.direction === 'incoming' ? '←' : '→';
+        const transport = data.transport || 'UDP';
+        
+        messageDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start mb-1">
+                <small class="text-muted">
+                    <strong>${timestamp}</strong> 
+                    <span class="badge bg-secondary">${transport}</span>
+                    <span class="badge ${data.direction === 'incoming' ? 'bg-success' : 'bg-primary'}">${direction} ${data.direction.toUpperCase()}</span>
+                    <span class="text-muted">${data.remote_addr || ''}</span>
+                </small>
+            </div>
+            <pre class="mb-0" style="font-size: 11px; white-space: pre-wrap;">${data.message}</pre>
+        `;
+        
+        sipContainer.appendChild(messageDiv);
+        
+        // Auto-scroll to bottom
+        const container = document.getElementById('sipMessagesContainer');
+        container.scrollTop = container.scrollHeight;
+        
+        // Keep only last 100 messages
+        const messages = sipContainer.children;
+        if (messages.length > 100) {
+            sipContainer.removeChild(messages[0]);
+        }
+    }
 }
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     new Dashboard();
 });
+
+// Clear SIP log function
+function clearSipLog() {
+    const sipContainer = document.getElementById('sipMessages');
+    sipContainer.innerHTML = '<div class="text-muted text-center">Log pulito - in attesa di nuovi messaggi SIP...</div>';
+}
 
 // Refresh function for manual refresh button
 function refreshHistory() {
