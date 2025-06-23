@@ -130,14 +130,17 @@ class RTPProcessor:
     
     def get_codec_from_payload_type(self, payload_type):
         """Map RTP payload type to codec name"""
-        # Standard payload types (RFC 3551)
+        # Standard payload types (RFC 3551) + Welcome Italia compatibility
         standard_payload_types = {
             0: 'G.711',    # PCMU
-            8: 'G.711',    # PCMA
-            18: 'G.729',   # G.729
+            8: 'G.711',    # PCMA (alaw - Welcome Italia)
+            18: 'G.729',   # G.729 (Welcome Italia primary)
+            19: 'G.729',   # G.729A (Welcome Italia variant)
             4: 'G.723.1',  # G.723
             3: 'GSM',      # GSM
             97: 'iLBC',    # iLBC (dynamic)
+            98: 'G.729',   # G.729 (alternative dynamic type)
+            99: 'G.729A',  # G.729A (alternative dynamic type)
             111: 'Opus',   # Opus (commonly used dynamic type)
             120: 'Opus',   # Opus (alternative dynamic type)
         }

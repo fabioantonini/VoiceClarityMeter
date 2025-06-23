@@ -59,10 +59,12 @@ class MOSCalculator:
             
     def _calculate_equipment_impairment(self, packet_loss_rate, jitter, codec):
         """Calculate equipment impairment factor Ie_eff"""
-        # Base equipment impairment for different codecs
+        # Base equipment impairment for different codecs (optimized for Welcome Italia)
         codec_impairments = {
-            'G.711': 0,      # PCMU/PCMA - Lossless
-            'G.729': 10,     # G.729 - 8kbps
+            'G.711': 0,      # PCMU/PCMA - Lossless (alaw/ulaw)
+            'G.729': 11,     # G.729 - 8kbps (Welcome Italia primary codec)
+            'G.729A': 11,    # G.729 Annex A variant
+            'G.729AB': 11,   # G.729 Annex A+B variant
             'G.723.1': 15,   # G.723.1 - 5.3/6.3kbps
             'GSM': 20,       # GSM - 13kbps
             'iLBC': 8,       # iLBC - 15.2kbps

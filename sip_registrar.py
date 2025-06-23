@@ -32,9 +32,11 @@ class SIPRegistrar:
         self.tcp_connections = {}
         self.tls_connections = {}  # Track TLS connections
         
-        # Configuration for FXS gateway
+        # Configuration for FXS gateway and Welcome Italia compatibility
         self.domain = "voip-monitor.local"
-        self.registration_expires = 3600  # 1 hour
+        self.registration_expires = 3600  # 1 hour (compatible with Welcome Italia)
+        self.supported_codecs = ['G.711', 'G.729', 'G.722', 'OPUS']
+        self.dtmf_support = 'rfc4733'  # Welcome Italia standard
         
         # Test extensions for quality monitoring (now with REAL RTP analysis)
         self.test_extensions = {
