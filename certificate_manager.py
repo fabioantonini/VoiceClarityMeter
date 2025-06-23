@@ -295,8 +295,8 @@ class CertificateManager:
         
         # Create PKCS12 for easy client installation
         try:
-            from cryptography.hazmat.primitives import serialization
-            p12 = serialization.pkcs12.serialize_key_and_certificates(
+            from cryptography.hazmat.primitives.serialization import pkcs12
+            p12 = pkcs12.serialize_key_and_certificates(
                 name=f"{client_name}-{extension}".encode(),
                 key=client_private_key,
                 cert=client_cert,
@@ -306,7 +306,8 @@ class CertificateManager:
             
             with open(client_p12_path, "wb") as f:
                 f.write(p12)
-        except:
+        except Exception as e:
+            print(f"Warning: Could not create PKCS12 bundle: {e}")
             client_p12_path = None
             
         return client_cert_path, client_key_path, client_p12_path

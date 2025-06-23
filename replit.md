@@ -22,6 +22,7 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 
 ### Communication Flow
 - SIP signaling on UDP and TCP port 5060 (dual transport support)
+- SIP secure signaling on TLS port 5061 (SIPS with certificate-based encryption)
 - RTP media processing on dynamically allocated ports
 - WebSocket connections for real-time dashboard updates
 - RESTful API endpoints for data retrieval
@@ -73,9 +74,10 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - **Socket.IO** - WebSocket client library
 
 ### Network Protocols
-- **SIP (Session Initiation Protocol)** - VoIP session management over UDP and TCP
+- **SIP (Session Initiation Protocol)** - VoIP session management over UDP, TCP and TLS
+- **SIPS (SIP over TLS)** - Secure encrypted SIP signaling on port 5061
 - **RTP (Real-time Transport Protocol)** - Audio packet delivery
-- **UDP/TCP** - Dual transport layer support for SIP signaling
+- **UDP/TCP/TLS** - Triple transport layer support for SIP signaling
 - **WebSocket** - Real-time dashboard communication
 
 ## Deployment Strategy
@@ -107,6 +109,7 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 22, 2025: Prepared complete Ubuntu 22.04 deployment package with automatic installation scripts
 - June 23, 2025: Modified test extensions (999-996) to use real RTP analysis instead of simulation
 - June 23, 2025: Added Opus codec support with automatic detection from RTP payload type and specific MOS calculation parameters
+- June 23, 2025: Implemented complete TLS support on port 5061 (SIPS) with certificate management system for secure SIP communications
 
 ## User Preferences
 
