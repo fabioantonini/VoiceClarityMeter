@@ -120,17 +120,21 @@ class Dashboard {
         tbody.innerHTML = '';
         
         if (calls.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No active calls</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No active calls</td></tr>';
             return;
         }
         
         calls.forEach(call => {
             const row = document.createElement('tr');
+            const codec = call.codec || 'G.711';
+            const codecClass = codec === 'Opus' ? 'bg-primary' : 'bg-secondary';
+            
             row.innerHTML = `
                 <td>${this.truncateString(call.call_id, 20)}</td>
                 <td>${call.from_address || 'N/A'}</td>
                 <td>${call.to_address || 'N/A'}</td>
                 <td>${this.formatDuration(call.start_time)}</td>
+                <td><span class="badge ${codecClass}">${codec}</span></td>
                 <td><span class="badge ${this.getMosClass(call.current_mos || 0)}">${(call.current_mos || 0).toFixed(2)}</span></td>
                 <td>${(call.packet_loss_rate || 0).toFixed(2)}%</td>
                 <td>${(call.jitter || 0).toFixed(2)}ms</td>

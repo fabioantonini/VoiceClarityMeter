@@ -72,6 +72,10 @@ class RTPProcessor:
                 self.packets_received += 1
                 current_time = time.time()
                 
+                # Update detected codec from RTP header
+                if 'codec' in rtp_header:
+                    self.detected_codec = rtp_header['codec']
+                
                 # Calculate packet loss
                 self.calculate_packet_loss(rtp_header['sequence'])
                 
@@ -197,11 +201,12 @@ class RTPProcessor:
             # Estimate delay (simplified - in production would use RTCP)
             delay = 50  # Default assumption of 50ms delay
             
-            # Calculate MOS score
+            # Calculate MOS score using detected codec
             mos_score = self.mos_calculator.calculate_mos(
-                packet_loss_rate=packet_loss,
-                jitter=jitter,
-                delay=delay
+                packet_loss_rate=int(packet_loss),
+                jitter=int(jitter),
+                delay=delay,
+                codec=self.detected_codec
             )
             
             # Update call manager with metrics
@@ -212,7 +217,8 @@ class RTPProcessor:
                 'packet_loss_rate': packet_loss,
                 'jitter': jitter,
                 'delay': delay,
-                'mos_score': mos_score
+                'mos_score': mos_score,
+                'codec': self.detected_codec
             }
             
             self.call_manager.update_call_metrics(self.call_id, metrics)
