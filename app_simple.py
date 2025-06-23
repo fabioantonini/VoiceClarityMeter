@@ -16,6 +16,7 @@ from call_manager import CallManager
 from config_helper import ConfigHelper
 from sip_registrar import SIPRegistrar
 from mos_calculator import MOSCalculator
+from certificate_manager import CertificateManager
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -68,6 +69,7 @@ def make_session_permanent():
 # Initialize core components
 call_manager = CallManager()
 config_helper = ConfigHelper()
+certificate_manager = CertificateManager()
 sip_server = None
 
 # Routes
@@ -87,6 +89,12 @@ def dashboard():
 def config():
     """SIP client configuration helper"""
     return render_template('config.html', user=current_user)
+
+@app.route('/certificates')
+@require_login
+def certificates():
+    """TLS certificate management"""
+    return render_template('certificates.html', user=current_user)
 
 # API Routes
 @app.route('/api/calls/active')
