@@ -536,6 +536,8 @@ class SIPRegistrar:
             # Send via appropriate transport
             if transport == 'TCP' and client_socket:
                 client_socket.send(response.encode('utf-8'))
+            elif transport == 'TLS' and client_socket:
+                client_socket.send(response.encode('utf-8'))
             else:
                 self.udp_socket.sendto(response.encode('utf-8'), addr)
                 
@@ -556,6 +558,8 @@ class SIPRegistrar:
             response += sdp
             
             if transport == 'TCP' and client_socket:
+                client_socket.send(response.encode('utf-8'))
+            elif transport == 'TLS' and client_socket:
                 client_socket.send(response.encode('utf-8'))
             else:
                 self.udp_socket.sendto(response.encode('utf-8'), addr)
