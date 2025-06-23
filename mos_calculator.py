@@ -61,11 +61,13 @@ class MOSCalculator:
         """Calculate equipment impairment factor Ie_eff"""
         # Base equipment impairment for different codecs
         codec_impairments = {
-            'G.711': 0,      # PCMU/PCMA
-            'G.729': 10,     # G.729
-            'G.723.1': 15,   # G.723.1
-            'GSM': 20,       # GSM
-            'iLBC': 8        # iLBC
+            'G.711': 0,      # PCMU/PCMA - Lossless
+            'G.729': 10,     # G.729 - 8kbps
+            'G.723.1': 15,   # G.723.1 - 5.3/6.3kbps
+            'GSM': 20,       # GSM - 13kbps
+            'iLBC': 8,       # iLBC - 15.2kbps
+            'Opus': 2,       # Opus - Variable bitrate, high quality
+            'OPUS': 2        # Opus uppercase variant
         }
         
         Ie = codec_impairments.get(codec, 0)
@@ -76,7 +78,16 @@ class MOSCalculator:
             Bpl = 1  # Random packet loss assumption
             
             # Packet loss robustness factor (codec dependent)
-            Ppl = 1 if codec == 'G.711' else 2
+            codec_robustness = {
+                'G.711': 1,      # Low robustness - uncompressed
+                'G.729': 2,      # Medium robustness
+                'G.723.1': 2,    # Medium robustness
+                'GSM': 2,        # Medium robustness
+                'iLBC': 1.5,     # Better than G.711, designed for packet loss
+                'Opus': 1.2,     # High robustness - modern codec with error correction
+                'OPUS': 1.2      # Opus uppercase variant
+            }
+            Ppl = codec_robustness.get(codec, 2)
             
             # Calculate packet loss impairment
             loss_impairment = Ie + (95 - Ie) * (packet_loss_rate / (packet_loss_rate + Bpl))

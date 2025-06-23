@@ -22,6 +22,7 @@ class RTPProcessor:
         self.last_packet_time = None
         self.sequence_numbers = []
         self.timestamps = []
+        self.detected_codec = 'G.711'  # Default codec, updated from RTP packets
         
     def start_processing(self):
         """Start processing RTP packets"""
@@ -106,18 +107,45 @@ class RTPProcessor:
             timestamp = header[3]
             ssrc = header[4]
             
+            # Determine codec from payload type
+            codec = self.get_codec_from_payload_type(payload_type)
+            
             return {
                 'version': version,
                 'sequence': sequence,
                 'timestamp': timestamp,
                 'ssrc': ssrc,
                 'payload_type': payload_type,
-                'marker': marker
+                'marker': marker,
+                'codec': codec
             }
             
         except Exception as e:
             print(f"Error parsing RTP header: {e}")
             return None
+    
+    def get_codec_from_payload_type(self, payload_type):
+        """Map RTP payload type to codec name"""
+        # Standard payload types (RFC 3551)
+        standard_payload_types = {
+            0: 'G.711',    # PCMU
+            8: 'G.711',    # PCMA
+            18: 'G.729',   # G.729
+            4: 'G.723.1',  # G.723
+            3: 'GSM',      # GSM
+            97: 'iLBC',    # iLBC (dynamic)
+            111: 'Opus',   # Opus (commonly used dynamic type)
+            120: 'Opus',   # Opus (alternative dynamic type)
+        }
+        
+        # Check for dynamic payload types that could be Opus
+        if payload_type >= 96 and payload_type <= 127:
+            # Dynamic payload type - assume Opus for common ranges
+            if payload_type in [96, 97, 111, 120, 121, 122]:
+                return 'Opus'
+            return 'Unknown'
+        
+        return standard_payload_types.get(payload_type, 'G.711')
             
     def calculate_packet_loss(self, sequence):
         """Calculate packet loss percentage"""
