@@ -416,6 +416,9 @@ class SIPRegistrar:
                 
             print(f"Sent {code} {reason} to {addr} via {transport}")
             
+            # Broadcast outgoing SIP message to dashboard
+            self.broadcast_sip_message(response, addr, transport, 'outgoing')
+            
         except Exception as e:
             print(f"Error sending SIP response: {e}")
             
@@ -433,6 +436,9 @@ class SIPRegistrar:
                 self.udp_socket.sendto(response.encode('utf-8'), addr)
                 
             print(f"Sent 200 OK with SDP to {addr} via {transport}")
+            
+            # Broadcast outgoing SIP message to dashboard
+            self.broadcast_sip_message(response, addr, transport, 'outgoing')
             
         except Exception as e:
             print(f"Error sending OK with SDP: {e}")
@@ -555,6 +561,19 @@ a=sendrecv
                 'addr': f"{info['addr'][0]}:{info['addr'][1]}"
             })
         return devices
+    
+    def broadcast_sip_message(self, message, addr, transport, direction):
+        """Broadcast SIP message to dashboard via WebSocket"""
+        try:
+            self.socketio.emit('sip_message', {
+                'message': message,
+                'remote_addr': f"{addr[0]}:{addr[1]}",
+                'transport': transport,
+                'direction': direction,
+                'timestamp': datetime.now().isoformat()
+            })
+        except Exception as e:
+            print(f"Error broadcasting SIP message: {e}")
         
     def stop(self):
         """Stop the SIP Registrar"""
