@@ -17,14 +17,18 @@ class SIPRegistrar:
         self.host = '0.0.0.0'
         self.udp_port = 5060
         self.tcp_port = 5060
+        self.tls_port = 5061
         self.udp_socket = None
         self.tcp_socket = None
+        self.tls_socket = None
         self.running = False
+        self.ssl_context = None
         
         # Registry for connected devices
         self.registered_devices = {}  # {extension: {contact, expires, last_seen, transport}}
         self.active_calls = {}
         self.tcp_connections = {}
+        self.tls_connections = {}  # Track TLS connections
         
         # Configuration for FXS gateway
         self.domain = "voip-monitor.local"
