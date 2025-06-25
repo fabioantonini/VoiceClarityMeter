@@ -242,6 +242,39 @@ class Dashboard {
         });
     }
     
+    addSipMessage(data) {
+        const sipMessages = document.getElementById('sipMessages');
+        if (!sipMessages) return;
+        
+        // Clear the "waiting" message if it exists
+        if (sipMessages.innerHTML.includes('In attesa di messaggi SIP')) {
+            sipMessages.innerHTML = '';
+        }
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const direction = data.direction === 'incoming' ? '⬇️' : '⬆️';
+        const color = data.direction === 'incoming' ? 'text-primary' : 'text-success';
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `mb-2 ${color}`;
+        messageDiv.innerHTML = `
+            <div class="fw-bold">
+                <span class="badge bg-secondary">${timestamp}</span>
+                ${direction} ${data.direction} from ${data.addr} via ${data.transport}
+            </div>
+            <pre class="mt-1 mb-0" style="font-size: 11px; white-space: pre-wrap;">${data.message}</pre>
+            <hr class="my-2">
+        `;
+        
+        sipMessages.appendChild(messageDiv);
+        sipMessages.scrollTop = sipMessages.scrollHeight;
+        
+        // Keep only last 50 messages
+        while (sipMessages.children.length > 50) {
+            sipMessages.removeChild(sipMessages.firstChild);
+        }
+    }
+    
     // Utility functions
     formatDuration(startTime) {
         if (!startTime) return '0s';

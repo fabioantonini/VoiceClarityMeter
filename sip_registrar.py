@@ -743,13 +743,16 @@ a=sendrecv
         """Verify SIP authentication credentials using digest authentication"""
         try:
             if username not in self.sip_users:
+                print(f"DEBUG: Username {username} not found in sip_users")
                 return False
                 
             password = self.sip_users[username]
+            print(f"DEBUG: Found password for {username}: {password}")
             
             # Parse authorization header
             auth_params = {}
             auth_data = authorization.replace('Digest ', '')
+            print(f"DEBUG: Auth data: {auth_data}")
             
             # Split by comma and parse key=value pairs
             for param in auth_data.split(','):
@@ -760,6 +763,8 @@ a=sendrecv
                     value = value.strip().strip('"')
                     auth_params[key] = value
             
+            print(f"DEBUG: Parsed auth params: {auth_params}")
+            
             # Extract required parameters
             auth_username = auth_params.get('username', '')
             realm = auth_params.get('realm', '')
@@ -769,6 +774,7 @@ a=sendrecv
             
             # Verify username matches
             if auth_username != username:
+                print(f"DEBUG: Username mismatch: {auth_username} vs {username}")
                 return False
             
             # Calculate expected response using MD5 digest
@@ -777,19 +783,27 @@ a=sendrecv
             # A1 = username:realm:password
             a1 = f"{username}:{realm}:{password}"
             ha1 = hashlib.md5(a1.encode()).hexdigest()
+            print(f"DEBUG: A1={a1}, HA1={ha1}")
             
             # A2 = method:uri (method is REGISTER for registration)
             a2 = f"REGISTER:{uri}"
             ha2 = hashlib.md5(a2.encode()).hexdigest()
+            print(f"DEBUG: A2={a2}, HA2={ha2}")
             
             # Response = MD5(HA1:nonce:HA2)
             expected_response = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
+            print(f"DEBUG: Expected response: {expected_response}")
+            print(f"DEBUG: Received response: {response}")
             
             # Compare responses
-            return response.lower() == expected_response.lower()
+            result = response.lower() == expected_response.lower()
+            print(f"DEBUG: Auth result: {result}")
+            return result
             
         except Exception as e:
             print(f"Auth verification error: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def send_auth_challenge(self, addr, request_headers, transport, client_socket=None):
