@@ -740,15 +740,56 @@ a=sendrecv
             self.close_tcp_connection(client_socket)
     
     def verify_sip_auth(self, authorization, username):
-        """Verify SIP authentication credentials"""
+        """Verify SIP authentication credentials using digest authentication"""
         try:
-            # Simple username/password check for gateway authentication
-            if username in self.sip_users:
-                # Accept any authorization header if username exists
-                # In production, this should use proper digest authentication
-                return True
-            return False
-        except:
+            if username not in self.sip_users:
+                return False
+                
+            password = self.sip_users[username]
+            
+            # Parse authorization header
+            auth_params = {}
+            auth_data = authorization.replace('Digest ', '')
+            
+            # Split by comma and parse key=value pairs
+            for param in auth_data.split(','):
+                param = param.strip()
+                if '=' in param:
+                    key, value = param.split('=', 1)
+                    key = key.strip()
+                    value = value.strip().strip('"')
+                    auth_params[key] = value
+            
+            # Extract required parameters
+            auth_username = auth_params.get('username', '')
+            realm = auth_params.get('realm', '')
+            nonce = auth_params.get('nonce', '')
+            uri = auth_params.get('uri', '')
+            response = auth_params.get('response', '')
+            
+            # Verify username matches
+            if auth_username != username:
+                return False
+            
+            # Calculate expected response using MD5 digest
+            import hashlib
+            
+            # A1 = username:realm:password
+            a1 = f"{username}:{realm}:{password}"
+            ha1 = hashlib.md5(a1.encode()).hexdigest()
+            
+            # A2 = method:uri (method is REGISTER for registration)
+            a2 = f"REGISTER:{uri}"
+            ha2 = hashlib.md5(a2.encode()).hexdigest()
+            
+            # Response = MD5(HA1:nonce:HA2)
+            expected_response = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
+            
+            # Compare responses
+            return response.lower() == expected_response.lower()
+            
+        except Exception as e:
+            print(f"Auth verification error: {e}")
             return False
     
     def send_auth_challenge(self, addr, request_headers, transport, client_socket=None):

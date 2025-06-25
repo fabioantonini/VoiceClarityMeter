@@ -1,0 +1,198 @@
+No.     Time           Source                Destination           Protocol Length Info
+   1187 43.904319247   10.11.4.105           10.11.4.98            SIP      667    Request: REGISTER sip:10.11.4.98:5060  (1 binding) | 
+
+Frame 1187: 667 bytes on wire (5336 bits), 667 bytes captured (5336 bits) on interface enp1s0, id 0
+Ethernet II, Src: Tiesse_00:19:4d (c8:77:65:00:19:4d), Dst: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f)
+Internet Protocol Version 4, Src: 10.11.4.105, Dst: 10.11.4.98
+User Datagram Protocol, Src Port: 64754, Dst Port: 5060
+Session Initiation Protocol (REGISTER)
+    Request-Line: REGISTER sip:10.11.4.98:5060 SIP/2.0
+        Method: REGISTER
+        Request-URI: sip:10.11.4.98:5060
+            Request-URI Host Part: 10.11.4.98
+            Request-URI Host Port: 5060
+        [Resent Packet: False]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.105:64754;rport;branch=z9hG4bKPja3aac8a5347141b1a4e165966d15951c
+            Transport: UDP
+            Sent-by Address: 10.11.4.105
+            Sent-by port: 64754
+            RPort: rport
+            Branch: z9hG4bKPja3aac8a5347141b1a4e165966d15951c
+        Route: <sip:10.11.4.98:5060;lr>
+            Route URI: sip:10.11.4.98:5060;lr
+                Route Host Part: 10.11.4.98
+                Route Host Port: 5060
+                Route URI parameter: lr
+        Max-Forwards: 70
+        From: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>;tag=6c838f73083340fc92800e655dc879a6
+            SIP from display info: "MicroSIP"
+            SIP from address: sip:gateway-monitor@voip-monitor.local
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: voip-monitor.local
+            SIP from tag: 6c838f73083340fc92800e655dc879a6
+        To: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>
+            SIP to display info: "MicroSIP"
+            SIP to address: sip:gateway-monitor@voip-monitor.local
+                SIP to address User Part: gateway-monitor
+                SIP to address Host Part: voip-monitor.local
+        Call-ID: 601b92033f7d44afa606838cab95ad1a
+        [Generated Call-ID: 601b92033f7d44afa606838cab95ad1a]
+        CSeq: 34307 REGISTER
+            Sequence Number: 34307
+            Method: REGISTER
+        User-Agent: MicroSIP/3.20.3
+        Contact: "MicroSIP" <sip:gateway-monitor@10.11.4.105:64754;ob>
+            SIP C-URI display info: "MicroSIP"
+            Contact URI: sip:gateway-monitor@10.11.4.105:64754;ob
+                Contact URI User Part: gateway-monitor
+                Contact URI Host Part: 10.11.4.105
+                Contact URI Host Port: 64754
+                Contact URI parameter: ob
+        Expires: 300
+        Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
+        Content-Length:  0
+
+No.     Time           Source                Destination           Protocol Length Info
+   1188 43.905195615   10.11.4.98            10.11.4.105           SIP      537    Status: 401 Unauthorized | 
+
+Frame 1188: 537 bytes on wire (4296 bits), 537 bytes captured (4296 bits) on interface enp1s0, id 0
+Ethernet II, Src: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f), Dst: IntelCor_02:ff:17 (50:e0:85:02:ff:17)
+Internet Protocol Version 4, Src: 10.11.4.98, Dst: 10.11.4.105
+User Datagram Protocol, Src Port: 5060, Dst Port: 64754
+Session Initiation Protocol (401)
+    Status-Line: SIP/2.0 401 Unauthorized
+        Status-Code: 401
+        [Resent Packet: False]
+        [Request Frame: 1187]
+        [Response Time (ms): 0]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.105:64754;rport;branch=z9hG4bKPja3aac8a5347141b1a4e165966d15951c
+            Transport: UDP
+            Sent-by Address: 10.11.4.105
+            Sent-by port: 64754
+            RPort: rport
+            Branch: z9hG4bKPja3aac8a5347141b1a4e165966d15951c
+        Call-ID: 601b92033f7d44afa606838cab95ad1a
+        [Generated Call-ID: 601b92033f7d44afa606838cab95ad1a]
+        From: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>;tag=6c838f73083340fc92800e655dc879a6
+            SIP from display info: "MicroSIP"
+            SIP from address: sip:gateway-monitor@voip-monitor.local
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: voip-monitor.local
+            SIP from tag: 6c838f73083340fc92800e655dc879a6
+        To: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>
+            SIP to display info: "MicroSIP"
+            SIP to address: sip:gateway-monitor@voip-monitor.local
+                SIP to address User Part: gateway-monitor
+                SIP to address Host Part: voip-monitor.local
+        CSeq: 34307 REGISTER
+            Sequence Number: 34307
+            Method: REGISTER
+        WWW-Authenticate: Digest realm="voip-monitor.local", nonce="a1c8069463163ac1254d70a6fda97995"
+            Authentication Scheme: Digest
+            Realm: "voip-monitor.local"
+            Nonce Value: "a1c8069463163ac1254d70a6fda97995"
+        Server: VoIP-Quality-Monitor-Registrar/1.0
+        Content-Length: 0
+
+No.     Time           Source                Destination           Protocol Length Info
+   1189 43.907297590   10.11.4.105           10.11.4.98            SIP      859    Request: REGISTER sip:10.11.4.98:5060  (1 binding) | 
+
+Frame 1189: 859 bytes on wire (6872 bits), 859 bytes captured (6872 bits) on interface enp1s0, id 0
+Ethernet II, Src: Tiesse_00:19:4d (c8:77:65:00:19:4d), Dst: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f)
+Internet Protocol Version 4, Src: 10.11.4.105, Dst: 10.11.4.98
+User Datagram Protocol, Src Port: 64754, Dst Port: 5060
+Session Initiation Protocol (REGISTER)
+    Request-Line: REGISTER sip:10.11.4.98:5060 SIP/2.0
+        Method: REGISTER
+        Request-URI: sip:10.11.4.98:5060
+            Request-URI Host Part: 10.11.4.98
+            Request-URI Host Port: 5060
+        [Resent Packet: False]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.105:64754;rport;branch=z9hG4bKPj3763dd60f1fa4ec5b36cb503f0ca48f7
+            Transport: UDP
+            Sent-by Address: 10.11.4.105
+            Sent-by port: 64754
+            RPort: rport
+            Branch: z9hG4bKPj3763dd60f1fa4ec5b36cb503f0ca48f7
+        Route: <sip:10.11.4.98:5060;lr>
+            Route URI: sip:10.11.4.98:5060;lr
+                Route Host Part: 10.11.4.98
+                Route Host Port: 5060
+                Route URI parameter: lr
+        Max-Forwards: 70
+        From: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>;tag=6c838f73083340fc92800e655dc879a6
+            SIP from display info: "MicroSIP"
+            SIP from address: sip:gateway-monitor@voip-monitor.local
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: voip-monitor.local
+            SIP from tag: 6c838f73083340fc92800e655dc879a6
+        To: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>
+            SIP to display info: "MicroSIP"
+            SIP to address: sip:gateway-monitor@voip-monitor.local
+                SIP to address User Part: gateway-monitor
+                SIP to address Host Part: voip-monitor.local
+        Call-ID: 601b92033f7d44afa606838cab95ad1a
+        [Generated Call-ID: 601b92033f7d44afa606838cab95ad1a]
+        CSeq: 34308 REGISTER
+            Sequence Number: 34308
+            Method: REGISTER
+        User-Agent: MicroSIP/3.20.3
+        Contact: "MicroSIP" <sip:gateway-monitor@10.11.4.105:64754;ob>
+            SIP C-URI display info: "MicroSIP"
+            Contact URI: sip:gateway-monitor@10.11.4.105:64754;ob
+                Contact URI User Part: gateway-monitor
+                Contact URI Host Part: 10.11.4.105
+                Contact URI Host Port: 64754
+                Contact URI parameter: ob
+        Expires: 300
+        Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, SUBSCRIBE, NOTIFY, REFER, MESSAGE, OPTIONS
+        Authorization: Digest username="gateway-monitor", realm="voip-monitor.local", nonce="a1c8069463163ac1254d70a6fda97995", uri="sip:10.11.4.98:5060", response="35e6b15c634a40921ec4bf215eb03562"
+            Authentication Scheme: Digest
+            Username: "gateway-monitor"
+            Realm: "voip-monitor.local"
+            Nonce Value: "a1c8069463163ac1254d70a6fda97995"
+            Authentication URI: "sip:10.11.4.98:5060"
+            Digest Authentication Response: "35e6b15c634a40921ec4bf215eb03562"
+        Content-Length:  0
+
+No.     Time           Source                Destination           Protocol Length Info
+   1190 43.908245695   10.11.4.98            10.11.4.105           SIP      439    Status: 403 Forbidden | 
+
+Frame 1190: 439 bytes on wire (3512 bits), 439 bytes captured (3512 bits) on interface enp1s0, id 0
+Ethernet II, Src: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f), Dst: IntelCor_02:ff:17 (50:e0:85:02:ff:17)
+Internet Protocol Version 4, Src: 10.11.4.98, Dst: 10.11.4.105
+User Datagram Protocol, Src Port: 5060, Dst Port: 64754
+Session Initiation Protocol (403)
+    Status-Line: SIP/2.0 403 Forbidden
+        Status-Code: 403
+        [Resent Packet: False]
+        [Request Frame: 1189]
+        [Response Time (ms): 0]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.105:64754;rport;branch=z9hG4bKPj3763dd60f1fa4ec5b36cb503f0ca48f7
+            Transport: UDP
+            Sent-by Address: 10.11.4.105
+            Sent-by port: 64754
+            RPort: rport
+            Branch: z9hG4bKPj3763dd60f1fa4ec5b36cb503f0ca48f7
+        Call-ID: 601b92033f7d44afa606838cab95ad1a
+        [Generated Call-ID: 601b92033f7d44afa606838cab95ad1a]
+        From: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>;tag=6c838f73083340fc92800e655dc879a6
+            SIP from display info: "MicroSIP"
+            SIP from address: sip:gateway-monitor@voip-monitor.local
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: voip-monitor.local
+            SIP from tag: 6c838f73083340fc92800e655dc879a6
+        To: "MicroSIP" <sip:gateway-monitor@voip-monitor.local>
+            SIP to display info: "MicroSIP"
+            SIP to address: sip:gateway-monitor@voip-monitor.local
+                SIP to address User Part: gateway-monitor
+                SIP to address Host Part: voip-monitor.local
+        CSeq: 34308 REGISTER
+            Sequence Number: 34308
+            Method: REGISTER
+        Server: VoIP-Quality-Monitor-Registrar/1.0
+        Content-Length: 0
