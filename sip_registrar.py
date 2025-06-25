@@ -377,11 +377,16 @@ class SIPRegistrar:
             extension = self.extract_extension(from_header)
             contact_uri = self.extract_contact_uri(contact)
             
+            print(f"DEBUG REGISTER: extension={extension}, from_header={from_header}")
+            
             # Check for authentication
             if authorization:
+                print(f"DEBUG: Authorization header present: {authorization[:50]}...")
                 # Parse authorization header
                 auth_valid = self.verify_sip_auth(authorization, extension)
+                print(f"DEBUG: Auth result for {extension}: {auth_valid}")
                 if not auth_valid:
+                    print(f"DEBUG: Sending 403 Forbidden for {extension}")
                     self.send_response(addr, '403', 'Forbidden', headers, transport, client_socket)
                     return
             else:
