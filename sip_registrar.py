@@ -837,7 +837,9 @@ a=sendrecv
                 client_socket.send(response.encode('utf-8'))
             else:
                 self.udp_socket.sendto(response.encode('utf-8'), addr)
-                
+            
+            # Broadcast outgoing challenge to dashboard
+            self.broadcast_sip_message(response, addr, transport, 'outgoing')
             print(f"Sent 401 Unauthorized to {addr} via {transport}")
             
         except Exception as e:

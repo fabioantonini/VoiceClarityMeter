@@ -444,5 +444,17 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script src="/static/js/dashboard_simple.js"></script>
+    <script>
+        // Initialize dashboard
+        const dashboard = new Dashboard();
+        
+        // Clear SIP messages function
+        function clearSipMessages() {
+            const sipMessages = document.getElementById('sipMessages');
+            if (sipMessages) {
+                sipMessages.innerHTML = '<div class="text-muted">In attesa di messaggi SIP...</div>';
+            }
+        }
+    </script>
 </body>
 </html>
