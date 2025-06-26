@@ -591,10 +591,10 @@ class SIPRegistrar:
         except Exception as e:
             print(f"Error sending SIP response: {e}")
             
-    def send_ok_with_sdp(self, addr, request_headers, transport, client_socket, call_id):
+    def send_ok_with_sdp(self, addr, request_headers, transport, client_socket, call_id, rtp_port=5004):
         """Send 200 OK with SDP for INVITE"""
         try:
-            sdp = self.generate_sdp()
+            sdp = self.generate_sdp(rtp_port)
             
             response = self.build_ok_response(request_headers, len(sdp))
             response += sdp
