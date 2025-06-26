@@ -114,6 +114,7 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 26, 2025: Fixed SIP username extraction regex to handle alphanumeric usernames (gateway-monitor)
 - June 26, 2025: Resolved SIP call flow issues by eliminating 302 redirects - now uses standard 180 Ringing → 200 OK sequence for all calls
 - June 26, 2025: Fixed WebSocket connection issues in dashboard by adding proper Socket.IO initialization checks
+- June 26, 2025: Fixed SDP malformation causing "Incompatible SDP answer" error in Linphone - added proper \r\n line terminators to SDP format
 
 ## User Preferences
 

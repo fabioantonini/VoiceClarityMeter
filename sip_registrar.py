@@ -667,18 +667,18 @@ class SIPRegistrar:
         import random
         rtp_port = random.randint(10000, 20000)
         
-        return f"""v=0
-o=voip-monitor 123456 654321 IN IP4 {local_ip}
-s=VoIP Quality Monitor
-c=IN IP4 {local_ip}
-t=0 0
-m=audio {rtp_port} RTP/AVP 0 8 18 101
-a=rtpmap:0 PCMU/8000
-a=rtpmap:8 PCMA/8000
-a=rtpmap:18 G729/8000
-a=rtpmap:101 telephone-event/8000
-a=fmtp:18 annexb=yes
-a=sendrecv
+        return f"""v=0\r
+o=voip-monitor 123456 654321 IN IP4 {local_ip}\r
+s=VoIP Quality Monitor\r
+c=IN IP4 {local_ip}\r
+t=0 0\r
+m=audio {rtp_port} RTP/AVP 0 8 18 101\r
+a=rtpmap:0 PCMU/8000\r
+a=rtpmap:8 PCMA/8000\r
+a=rtpmap:18 G729/8000\r
+a=rtpmap:101 telephone-event/8000\r
+a=fmtp:18 annexb=yes\r
+a=sendrecv\r
 """
         
     def get_local_ip(self):
