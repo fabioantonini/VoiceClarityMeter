@@ -5,9 +5,11 @@ class Dashboard {
         this.mosChart = null;
         this.networkChart = null;
         this.pollingInterval = null;
+        this.lastCallIds = null;
         this.initializeCharts();
         this.loadInitialData();
         this.setupPolling();
+        this.setupRefreshTimer();
     }
     
     setupPolling() {
@@ -51,6 +53,45 @@ class Dashboard {
                 this.updateGatewayStatus(data);
             })
             .catch(error => console.log('Gateway polling error:', error));
+    }
+    
+    setupRefreshTimer() {
+        // Refresh data every 30 seconds
+        setInterval(() => {
+            this.loadCallHistory();
+            this.loadSummaryStats();
+            this.refreshGatewayStatus();
+            this.refreshRegisteredDevices();
+        }, 30000);
+    }
+    
+    loadInitialData() {
+        this.loadActiveCalls();
+        this.loadCallHistory();
+        this.loadSummaryStats();
+        this.refreshGatewayStatus();
+        this.refreshRegisteredDevices();
+    }
+    
+    loadActiveCalls() {
+        fetch('/api/calls/active')
+            .then(response => response.json())
+            .then(data => this.updateActiveCalls(data))
+            .catch(error => console.error('Error loading active calls:', error));
+    }
+    
+    loadCallHistory() {
+        fetch('/api/calls/history')
+            .then(response => response.json())
+            .then(data => this.updateCallHistory(data))
+            .catch(error => console.error('Error loading call history:', error));
+    }
+    
+    loadSummaryStats() {
+        fetch('/api/stats/summary')
+            .then(response => response.json())
+            .then(data => this.updateSummaryStats(data))
+            .catch(error => console.error('Error loading summary stats:', error));
     }
     
     initializeCharts() {
