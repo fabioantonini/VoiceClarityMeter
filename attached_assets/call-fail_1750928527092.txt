@@ -1,0 +1,341 @@
+No.     Time           Source                Destination           Protocol Length Info
+    121 4.137664721    10.11.4.115           10.11.4.98            SIP/SDP  1279   Request: INVITE sip:999@10.11.4.98 | 
+
+Frame 121: 1279 bytes on wire (10232 bits), 1279 bytes captured (10232 bits) on interface enp1s0, id 0
+Ethernet II, Src: c4:cb:e1:04:78:67 (c4:cb:e1:04:78:67), Dst: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f)
+Internet Protocol Version 4, Src: 10.11.4.115, Dst: 10.11.4.98
+User Datagram Protocol, Src Port: 56351, Dst Port: 5060
+Session Initiation Protocol (INVITE)
+    Request-Line: INVITE sip:999@10.11.4.98 SIP/2.0
+        Method: INVITE
+        Request-URI: sip:999@10.11.4.98
+            Request-URI User Part: 999
+            Request-URI Host Part: 10.11.4.98
+        [Resent Packet: False]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.115:56351;branch=z9hG4bK.AYKfjLZ8C;rport
+            Transport: UDP
+            Sent-by Address: 10.11.4.115
+            Sent-by port: 56351
+            Branch: z9hG4bK.AYKfjLZ8C
+            RPort: rport
+        From: "Linphone" <sip:gateway-monitor@10.11.4.98>;tag=5YZpXAB2i
+            SIP from display info: "Linphone"
+            SIP from address: sip:gateway-monitor@10.11.4.98
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: 10.11.4.98
+            SIP from tag: 5YZpXAB2i
+        To: sip:999@10.11.4.98
+            SIP to address: sip:999@10.11.4.98
+                SIP to address User Part: 999
+                SIP to address Host Part: 10.11.4.98
+        CSeq: 20 INVITE
+            Sequence Number: 20
+            Method: INVITE
+        Call-ID: CUDsP4fOlM
+        [Generated Call-ID: CUDsP4fOlM]
+        Max-Forwards: 70
+        Supported: replaces, outbound, gruu, path, record-aware
+        Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, NOTIFY, MESSAGE, SUBSCRIBE, INFO, PRACK, UPDATE
+        Content-Type: application/sdp
+        Content-Length: 540
+        Contact: "Linphone" <sip:gateway-monitor@10.11.4.115:56351;transport=udp>;+sip.instance="<urn:uuid:0e87c383-fa35-46f5-bf42-ab36ac35efc1>"
+            SIP C-URI display info: "Linphone"
+            Contact URI: sip:gateway-monitor@10.11.4.115:56351;transport=udp
+                Contact URI User Part: gateway-monitor
+                Contact URI Host Part: 10.11.4.115
+                Contact URI Host Port: 56351
+                Contact URI parameter: transport=udp
+            Contact parameter: +sip.instance="<urn:uuid:0e87c383-fa35-46f5-bf42-ab36ac35efc1>"\r\n
+        User-Agent: Linphone-Desktop/6.0.0-CallEdition (fabio-laptop) windows/11 Qt/6.8.1 LinphoneSDK/5.4.17
+    Message Body
+        Session Description Protocol
+            Session Description Protocol Version (v): 0
+            Owner/Creator, Session Id (o): gateway-monitor 948 361 IN IP4 10.11.4.115
+                Owner Username: gateway-monitor
+                Session ID: 948
+                Session Version: 361
+                Owner Network Type: IN
+                Owner Address Type: IP4
+                Owner Address: 10.11.4.115
+            Session Name (s): Talk
+            Connection Information (c): IN IP4 10.11.4.115
+                Connection Network Type: IN
+                Connection Address Type: IP4
+                Connection Address: 10.11.4.115
+            Time Description, active time (t): 0 0
+                Session Start Time: 0
+                Session Stop Time: 0
+            Session Attribute (a): rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics
+                Session Attribute Fieldname: rtcp-xr
+                Session Attribute Value: rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics
+            Session Attribute (a): record:off
+                Session Attribute Fieldname: record
+                Session Attribute Value: off
+            Media Description, name and address (m): audio 58282 RTP/AVP 96 97 98 0 8 18 101 99 100
+                Media Type: audio
+                Media Port: 58282
+                Media Protocol: RTP/AVP
+                Media Format: DynamicRTP-Type-96
+                Media Format: DynamicRTP-Type-97
+                Media Format: DynamicRTP-Type-98
+                Media Format: ITU-T G.711 PCMU
+                Media Format: ITU-T G.711 PCMA
+                Media Format: ITU-T G.729
+                Media Format: DynamicRTP-Type-101
+                Media Format: DynamicRTP-Type-99
+                Media Format: DynamicRTP-Type-100
+            Media Attribute (a): rtpmap:96 opus/48000/2
+                Media Attribute Fieldname: rtpmap
+                Media Format: 96
+                MIME Type: opus
+                Sample Rate: 48000
+            Media Attribute (a): fmtp:96 useinbandfec=1
+                Media Attribute Fieldname: fmtp
+                Media Format: 96 [opus]
+                Media format specific parameters: useinbandfec=1
+            Media Attribute (a): rtpmap:97 speex/16000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 97
+                MIME Type: speex
+                Sample Rate: 16000
+            Media Attribute (a): fmtp:97 vbr=on
+                Media Attribute Fieldname: fmtp
+                Media Format: 97 [speex]
+                Media format specific parameters: vbr=on
+            Media Attribute (a): rtpmap:98 speex/8000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 98
+                MIME Type: speex
+                Sample Rate: 8000
+            Media Attribute (a): fmtp:98 vbr=on
+                Media Attribute Fieldname: fmtp
+                Media Format: 98 [speex]
+                Media format specific parameters: vbr=on
+            Media Attribute (a): fmtp:18 annexb=yes
+                Media Attribute Fieldname: fmtp
+                Media Format: 18 [Unknown]
+                Media format specific parameters: annexb=yes
+            Media Attribute (a): rtpmap:101 telephone-event/48000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 101
+                MIME Type: telephone-event
+                Sample Rate: 48000
+            Media Attribute (a): rtpmap:99 telephone-event/16000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 99
+                MIME Type: telephone-event
+                Sample Rate: 16000
+            Media Attribute (a): rtpmap:100 telephone-event/8000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 100
+                MIME Type: telephone-event
+                Sample Rate: 8000
+            Media Attribute (a): rtcp-fb:* trr-int 1000
+                Media Attribute Fieldname: rtcp-fb
+                Media Attribute Value: * trr-int 1000
+            Media Attribute (a): rtcp-fb:* ccm tmmbr
+                Media Attribute Fieldname: rtcp-fb
+                Media Attribute Value: * ccm tmmbr
+            [Generated Call-ID: CUDsP4fOlM]
+
+No.     Time           Source                Destination           Protocol Length Info
+    122 4.139186987    10.11.4.98            10.11.4.115           SIP/SDP  528    Status: 200 OK (INVITE) | 
+
+Frame 122: 528 bytes on wire (4224 bits), 528 bytes captured (4224 bits) on interface enp1s0, id 0
+Ethernet II, Src: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f), Dst: c4:cb:e1:04:78:67 (c4:cb:e1:04:78:67)
+Internet Protocol Version 4, Src: 10.11.4.98, Dst: 10.11.4.115
+User Datagram Protocol, Src Port: 5060, Dst Port: 56351
+Session Initiation Protocol (200)
+    Status-Line: SIP/2.0 200 OK
+        Status-Code: 200
+        [Resent Packet: False]
+        [Request Frame: 121]
+        [Response Time (ms): 1]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.115:56351;branch=z9hG4bK.AYKfjLZ8C;rport
+            Transport: UDP
+            Sent-by Address: 10.11.4.115
+            Sent-by port: 56351
+            Branch: z9hG4bK.AYKfjLZ8C
+            RPort: rport
+        Call-ID: CUDsP4fOlM
+        [Generated Call-ID: CUDsP4fOlM]
+        From: "Linphone" <sip:gateway-monitor@10.11.4.98>;tag=5YZpXAB2i
+            SIP from display info: "Linphone"
+            SIP from address: sip:gateway-monitor@10.11.4.98
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: 10.11.4.98
+            SIP from tag: 5YZpXAB2i
+        To: sip:999@10.11.4.98;tag=9198621
+            SIP to address: sip:999@10.11.4.98
+                SIP to address User Part: 999
+                SIP to address Host Part: 10.11.4.98
+            SIP to tag: 9198621
+        CSeq: 20 INVITE
+            Sequence Number: 20
+            Method: INVITE
+        Contact: <sip:10.11.4.98:5060>
+            Contact URI: sip:10.11.4.98:5060
+                Contact URI Host Part: 10.11.4.98
+                Contact URI Host Port: 5060
+        Content-Type: application/sdp
+        Content-Length: 178
+    Message Body
+        Session Description Protocol
+            Session Description Protocol Version (v): 0
+            Owner/Creator, Session Id (o): voip-monitor 123456 654321 IN IP4 10.11.4.98
+                Owner Username: voip-monitor
+                Session ID: 123456
+                Session Version: 654321
+                Owner Network Type: IN
+                Owner Address Type: IP4
+                Owner Address: 10.11.4.98
+            Session Name (s): VoIP Quality Monitor
+            Connection Information (c): IN IP4 10.11.4.98
+                Connection Network Type: IN
+                Connection Address Type: IP4
+                Connection Address: 10.11.4.98
+            Time Description, active time (t): 0 0
+                Session Start Time: 0
+                Session Stop Time: 0
+            Media Description, name and address (m): audio 8000 RTP/AVP 0 8
+                Media Type: audio
+                Media Port: 8000
+                Media Protocol: RTP/AVP
+                Media Format: ITU-T G.711 PCMU
+                Media Format: ITU-T G.711 PCMA
+            Media Attribute (a): rtpmap:0 PCMU/8000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 0
+                MIME Type: PCMU
+                Sample Rate: 8000
+            Media Attribute (a): rtpmap:8 PCMA/8000
+                Media Attribute Fieldname: rtpmap
+                Media Format: 8
+                MIME Type: PCMA
+                Sample Rate: 8000
+            Media Attribute (a): sendrecv
+            [Generated Call-ID: CUDsP4fOlM]
+
+No.     Time           Source                Destination           Protocol Length Info
+    123 4.163549970    10.11.4.115           10.11.4.98            SIP      402    Request: BYE sip:10.11.4.98:5060 | 
+
+Frame 123: 402 bytes on wire (3216 bits), 402 bytes captured (3216 bits) on interface enp1s0, id 0
+Ethernet II, Src: c4:cb:e1:04:78:67 (c4:cb:e1:04:78:67), Dst: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f)
+Internet Protocol Version 4, Src: 10.11.4.115, Dst: 10.11.4.98
+User Datagram Protocol, Src Port: 56351, Dst Port: 5060
+Session Initiation Protocol (BYE)
+    Request-Line: BYE sip:10.11.4.98:5060 SIP/2.0
+        Method: BYE
+        Request-URI: sip:10.11.4.98:5060
+            Request-URI Host Part: 10.11.4.98
+            Request-URI Host Port: 5060
+        [Resent Packet: False]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.115:56351;branch=z9hG4bK.2SRm2eSrv;rport
+            Transport: UDP
+            Sent-by Address: 10.11.4.115
+            Sent-by port: 56351
+            Branch: z9hG4bK.2SRm2eSrv
+            RPort: rport
+        From: "Linphone" <sip:gateway-monitor@10.11.4.98>;tag=5YZpXAB2i
+            SIP from display info: "Linphone"
+            SIP from address: sip:gateway-monitor@10.11.4.98
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: 10.11.4.98
+            SIP from tag: 5YZpXAB2i
+        To: <sip:999@10.11.4.98>;tag=9198621
+            SIP to address: sip:999@10.11.4.98
+                SIP to address User Part: 999
+                SIP to address Host Part: 10.11.4.98
+            SIP to tag: 9198621
+        CSeq: 21 BYE
+            Sequence Number: 21
+            Method: BYE
+        Call-ID: CUDsP4fOlM
+        [Generated Call-ID: CUDsP4fOlM]
+        Max-Forwards: 70
+        User-Agent: Linphone-Desktop/6.0.0-CallEdition (fabio-laptop) windows/11 Qt/6.8.1 LinphoneSDK/5.4.17
+
+No.     Time           Source                Destination           Protocol Length Info
+    124 4.164948631    10.11.4.98            10.11.4.115           SIP      328    Status: 200 OK (BYE) | 
+
+Frame 124: 328 bytes on wire (2624 bits), 328 bytes captured (2624 bits) on interface enp1s0, id 0
+Ethernet II, Src: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f), Dst: c4:cb:e1:04:78:67 (c4:cb:e1:04:78:67)
+Internet Protocol Version 4, Src: 10.11.4.98, Dst: 10.11.4.115
+User Datagram Protocol, Src Port: 5060, Dst Port: 56351
+Session Initiation Protocol (200)
+    Status-Line: SIP/2.0 200 OK
+        Status-Code: 200
+        [Resent Packet: False]
+        [Request Frame: 123]
+        [Response Time (ms): 1]
+        [Release Time (ms): 1]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.115:56351;branch=z9hG4bK.2SRm2eSrv;rport
+            Transport: UDP
+            Sent-by Address: 10.11.4.115
+            Sent-by port: 56351
+            Branch: z9hG4bK.2SRm2eSrv
+            RPort: rport
+        Call-ID: CUDsP4fOlM
+        [Generated Call-ID: CUDsP4fOlM]
+        From: "Linphone" <sip:gateway-monitor@10.11.4.98>;tag=5YZpXAB2i
+            SIP from display info: "Linphone"
+            SIP from address: sip:gateway-monitor@10.11.4.98
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: 10.11.4.98
+            SIP from tag: 5YZpXAB2i
+        To: <sip:999@10.11.4.98>;tag=9198621
+            SIP to address: sip:999@10.11.4.98
+                SIP to address User Part: 999
+                SIP to address Host Part: 10.11.4.98
+            SIP to tag: 9198621
+        CSeq: 21 BYE
+            Sequence Number: 21
+            Method: BYE
+        Server: VoIP-Quality-Monitor-Registrar/1.0
+        Content-Length: 0
+
+No.     Time           Source                Destination           Protocol Length Info
+    147 4.971950392    10.11.4.115           10.11.4.98            SIP      402    Request: ACK sip:10.11.4.98:5060 | 
+
+Frame 147: 402 bytes on wire (3216 bits), 402 bytes captured (3216 bits) on interface enp1s0, id 0
+Ethernet II, Src: c4:cb:e1:04:78:67 (c4:cb:e1:04:78:67), Dst: FujitsuT_ab:54:8f (90:1b:0e:ab:54:8f)
+Internet Protocol Version 4, Src: 10.11.4.115, Dst: 10.11.4.98
+User Datagram Protocol, Src Port: 56351, Dst Port: 5060
+Session Initiation Protocol (ACK)
+    Request-Line: ACK sip:10.11.4.98:5060 SIP/2.0
+        Method: ACK
+        Request-URI: sip:10.11.4.98:5060
+            Request-URI Host Part: 10.11.4.98
+            Request-URI Host Port: 5060
+        [Resent Packet: False]
+        [Request Frame: 123]
+        [Response Time (ms): 809]
+    Message Header
+        Via: SIP/2.0/UDP 10.11.4.115:56351;rport;branch=z9hG4bK.OTFBE3u86
+            Transport: UDP
+            Sent-by Address: 10.11.4.115
+            Sent-by port: 56351
+            RPort: rport
+            Branch: z9hG4bK.OTFBE3u86
+        From: "Linphone" <sip:gateway-monitor@10.11.4.98>;tag=5YZpXAB2i
+            SIP from display info: "Linphone"
+            SIP from address: sip:gateway-monitor@10.11.4.98
+                SIP from address User Part: gateway-monitor
+                SIP from address Host Part: 10.11.4.98
+            SIP from tag: 5YZpXAB2i
+        To: <sip:999@10.11.4.98>;tag=9198621
+            SIP to address: sip:999@10.11.4.98
+                SIP to address User Part: 999
+                SIP to address Host Part: 10.11.4.98
+            SIP to tag: 9198621
+        CSeq: 20 ACK
+            Sequence Number: 20
+            Method: ACK
+        Call-ID: CUDsP4fOlM
+        [Generated Call-ID: CUDsP4fOlM]
+        Max-Forwards: 70
+        User-Agent: Linphone-Desktop/6.0.0-CallEdition (fabio-laptop) windows/11 Qt/6.8.1 LinphoneSDK/5.4.17

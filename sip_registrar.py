@@ -650,14 +650,21 @@ class SIPRegistrar:
     def generate_sdp(self):
         """Generate SDP for call monitoring"""
         local_ip = self.get_local_ip()
+        # Use dynamic RTP port
+        import random
+        rtp_port = random.randint(10000, 20000)
+        
         return f"""v=0
 o=voip-monitor 123456 654321 IN IP4 {local_ip}
 s=VoIP Quality Monitor
 c=IN IP4 {local_ip}
 t=0 0
-m=audio 8000 RTP/AVP 0 8
+m=audio {rtp_port} RTP/AVP 0 8 18 101
 a=rtpmap:0 PCMU/8000
 a=rtpmap:8 PCMA/8000
+a=rtpmap:18 G729/8000
+a=rtpmap:101 telephone-event/8000
+a=fmtp:18 annexb=no
 a=sendrecv
 """
         
