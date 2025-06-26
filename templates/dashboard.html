@@ -499,7 +499,11 @@
                         // Refresh the history table to show empty state
                         if (window.dashboard) {
                             window.dashboard.refreshCallHistory();
+                            
+                            // Update summary stats to reflect cleared history
+                            window.dashboard.refreshSummaryStats();
                         }
+                        
                         alert('Cronologia chiamate cancellata con successo');
                     } else {
                         alert('Errore durante la cancellazione: ' + (data.error || 'Errore sconosciuto'));

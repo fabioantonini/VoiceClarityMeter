@@ -618,6 +618,14 @@ class Dashboard {
             this.networkChart.update('none');
         }
     }
+    
+    refreshCallHistory() {
+        this.loadCallHistory();
+    }
+    
+    refreshSummaryStats() {
+        this.loadSummaryStats();
+    }
 }
 
 // Initialize dashboard when DOM is loaded
