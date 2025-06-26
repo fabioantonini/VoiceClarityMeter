@@ -384,8 +384,11 @@
                             Call History
                         </h5>
                         <div>
-                            <button class="btn btn-sm btn-outline-primary" onclick="refreshHistory()">
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshHistory()">
                                 <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="clearCallHistory()">
+                                <i class="fas fa-trash me-1"></i>Clear History
                             </button>
                         </div>
                     </div>
@@ -475,7 +478,35 @@
         // Refresh history function
         function refreshHistory() {
             if (window.dashboard) {
-                window.dashboard.loadCallHistory();
+                window.dashboard.refreshCallHistory();
+            }
+        }
+        
+        // Clear call history function
+        function clearCallHistory() {
+            if (confirm('Sei sicuro di voler cancellare tutta la cronologia delle chiamate?')) {
+                fetch('/api/calls/history/clear', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh the history table to show empty state
+                        if (window.dashboard) {
+                            window.dashboard.refreshCallHistory();
+                        }
+                        alert('Cronologia chiamate cancellata con successo');
+                    } else {
+                        alert('Errore durante la cancellazione: ' + (data.error || 'Errore sconosciuto'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing call history:', error);
+                    alert('Errore durante la cancellazione della cronologia');
+                });
             }
         }
     </script>

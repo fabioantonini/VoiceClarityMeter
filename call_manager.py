@@ -15,6 +15,9 @@ class CallManager:
         # Load existing call history
         self.load_call_history()
         
+        # Start cleanup timer for orphaned calls
+        self.start_cleanup_timer()
+        
     def start_call(self, call_id, session_info):
         """Start tracking a new call"""
         with self.lock:
@@ -214,6 +217,14 @@ class CallManager:
             'avg_jitter': total_jitter / len(period_calls),
             'quality_distribution': dict(quality_dist)
         }
+    
+    def clear_call_history(self):
+        """Clear all call history"""
+        with self.lock:
+            self.call_history = []
+            self.save_call_history()
+            self.has_new_updates = True
+            print("Call history cleared")
         
     def save_call_history(self):
         """Save call history to file"""
@@ -233,3 +244,38 @@ class CallManager:
         except Exception as e:
             print(f"Error loading call history: {e}")
             self.call_history = []
+    
+    def cleanup_orphaned_calls(self):
+        """Clean up calls that have been active too long (likely orphaned)"""
+        with self.lock:
+            current_time = datetime.now()
+            orphaned_calls = []
+            
+            for call_id, call_data in self.active_calls.items():
+                call_start = datetime.fromisoformat(call_data['start_time'])
+                duration = (current_time - call_start).total_seconds()
+                
+                # Consider calls orphaned if active for more than 10 minutes without metrics
+                if duration > 600 and len(call_data['quality_metrics']) == 0:
+                    orphaned_calls.append(call_id)
+                # Or if active for more than 30 minutes regardless
+                elif duration > 1800:
+                    orphaned_calls.append(call_id)
+            
+            for call_id in orphaned_calls:
+                print(f"Cleaning up orphaned call: {call_id}")
+                self.end_call(call_id)
+    
+    def start_cleanup_timer(self):
+        """Start periodic cleanup of orphaned calls"""
+        def cleanup_loop():
+            import time
+            while True:
+                time.sleep(300)  # Check every 5 minutes
+                try:
+                    self.cleanup_orphaned_calls()
+                except Exception as e:
+                    print(f"Error in cleanup loop: {e}")
+        
+        cleanup_thread = threading.Thread(target=cleanup_loop, daemon=True)
+        cleanup_thread.start()

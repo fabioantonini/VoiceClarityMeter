@@ -112,6 +112,16 @@ def get_call_history():
     history = call_manager.get_call_history(limit)
     return jsonify(history)
 
+@app.route('/api/calls/history/clear', methods=['DELETE'])
+@require_login
+def clear_call_history():
+    """Clear all call history"""
+    try:
+        call_manager.clear_call_history()
+        return jsonify({'success': True, 'message': 'Call history cleared successfully'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/stats/summary')
 @require_login
 def get_summary_stats():
