@@ -246,28 +246,37 @@ class Dashboard {
         const sipMessages = document.getElementById('sipMessages');
         if (!sipMessages) return;
         
+        console.log('Received SIP message:', data); // Debug log
+        
         // Clear the "waiting" message if it exists
         if (sipMessages.innerHTML.includes('In attesa di messaggi SIP')) {
             sipMessages.innerHTML = '';
         }
         
-        const timestamp = new Date().toLocaleTimeString();
+        const timestamp = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
         const direction = data.direction === 'incoming' ? '⬇️' : '⬆️';
         const color = data.direction === 'incoming' ? 'text-primary' : 'text-success';
         
         const messageDiv = document.createElement('div');
         messageDiv.className = `mb-2 ${color}`;
         messageDiv.innerHTML = `
-            <div class="fw-bold">
-                <span class="badge bg-secondary">${timestamp}</span>
-                ${direction} ${data.direction} from ${data.addr} via ${data.transport}
+            <div class="fw-bold d-flex justify-content-between">
+                <span>
+                    <span class="badge bg-secondary">${timestamp}</span>
+                    ${direction} ${data.direction.toUpperCase()} 
+                </span>
+                <small class="text-muted">${data.remote_addr || 'unknown'} (${data.transport || 'UDP'})</small>
             </div>
-            <pre class="mt-1 mb-0" style="font-size: 11px; white-space: pre-wrap;">${data.message}</pre>
-            <hr class="my-2">
+            <pre class="mt-1 mb-0" style="font-size: 11px; white-space: pre-wrap; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;">${data.message}</pre>
         `;
         
         sipMessages.appendChild(messageDiv);
-        sipMessages.scrollTop = sipMessages.scrollHeight;
+        
+        // Auto-scroll to bottom
+        const container = document.getElementById('sipMessagesContainer');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
         
         // Keep only last 50 messages
         while (sipMessages.children.length > 50) {

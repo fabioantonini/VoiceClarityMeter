@@ -439,25 +439,53 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.4/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.4/socket.io.js" onload="initSocketIO()" onerror="handleSocketIOError()"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script src="/static/js/dashboard_simple.js"></script>
     <script>
+        let socketIOLoaded = false;
+        
+        // Called when Socket.IO loads successfully
+        function initSocketIO() {
+            console.log('Socket.IO loaded successfully');
+            socketIOLoaded = true;
+            initializeDashboard();
+        }
+        
+        // Called when Socket.IO fails to load
+        function handleSocketIOError() {
+            console.warn('Socket.IO failed to load, using polling mode');
+            socketIOLoaded = false;
+            initializeDashboard();
+        }
+        
         // Wait for Socket.IO to load before initializing dashboard
         function initializeDashboard() {
-            if (typeof io !== 'undefined') {
+            if (typeof Dashboard === 'undefined') {
+                // Dashboard class not loaded yet, retry
+                setTimeout(initializeDashboard, 100);
+                return;
+            }
+            
+            if (socketIOLoaded && typeof io !== 'undefined') {
+                console.log('Initializing dashboard with WebSocket support');
                 const dashboard = new Dashboard();
                 window.dashboard = dashboard;
             } else {
-                // Retry after 100ms if Socket.IO not loaded yet
-                setTimeout(initializeDashboard, 100);
+                console.log('Initializing dashboard in polling mode');
+                const dashboard = new Dashboard();
+                window.dashboard = dashboard;
             }
         }
         
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        // Initialize when DOM is ready (fallback)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.dashboard) {
+                setTimeout(initializeDashboard, 500);
+            }
+        });
         
         // Clear SIP messages function
         function clearSipMessages() {
