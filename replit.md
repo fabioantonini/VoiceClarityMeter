@@ -126,6 +126,9 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 26, 2025: Fixed SIP messages accumulation with proper scrollbar container structure
 - June 26, 2025: Added comprehensive chart updates using real call data every 2 seconds
 - June 26, 2025: Synchronized SDP RTP port (5004) with actual RTP processor for consistent packet reception
+- June 26, 2025: Added Call History clear functionality with confirmation dialog and automatic cleanup
+- June 26, 2025: Implemented orphaned call detection and automatic cleanup every 5 minutes
+- June 26, 2025: Fixed Call History update timing to ensure all terminated calls are properly recorded
 
 ## User Preferences
 
