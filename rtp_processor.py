@@ -34,19 +34,27 @@ class RTPProcessor:
             
             print(f"RTP Processor listening on port {self.port} for call {self.call_id}")
             
+            packet_count = 0
             while self.running:
                 try:
                     data, addr = self.socket.recvfrom(1024)
+                    packet_count += 1
+                    if packet_count <= 5:  # Log first 5 packets
+                        print(f"RTP packet #{packet_count} received from {addr} ({len(data)} bytes) for call {self.call_id}")
+                    elif packet_count == 6:
+                        print(f"RTP processing active for call {self.call_id} - logging reduced")
+                    
                     self.process_packet(data, addr)
                     
                 except socket.timeout:
                     # Check if call is still active
                     if not self.call_manager.is_call_active(self.call_id):
+                        print(f"Call {self.call_id} no longer active, stopping RTP processing")
                         break
                     continue
                     
                 except Exception as e:
-                    print(f"Error processing RTP packet: {e}")
+                    print(f"Error processing RTP packet for call {self.call_id}: {e}")
                     
         except Exception as e:
             print(f"Error starting RTP processor: {e}")
