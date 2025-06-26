@@ -308,8 +308,8 @@ class Dashboard {
                 <td>${this.formatDuration(call.start_time)}</td>
                 <td><span class="badge ${codecClass}">${codec}</span></td>
                 <td><span class="badge ${this.getMosClass(call.current_mos || 0)}">${(call.current_mos || 0).toFixed(2)}</span></td>
-                <td>${(call.packet_loss_rate || 0).toFixed(2)}%</td>
-                <td>${(call.jitter || 0).toFixed(2)}ms</td>
+                <td>${(call.current_packet_loss || 0).toFixed(2)}%</td>
+                <td>${(call.current_jitter || 0).toFixed(2)}ms</td>
                 <td><span class="badge ${this.getQualityClass(this.getQualityCategory(call.current_mos || 0))}">${this.getQualityCategory(call.current_mos || 0)}</span></td>
             `;
             tbody.appendChild(row);
@@ -600,11 +600,15 @@ class Dashboard {
         let validCalls = 0;
         
         calls.forEach(call => {
+            console.log(`Debug call metrics - ID: ${call.call_id}, MOS: ${call.current_mos}, Loss: ${call.current_packet_loss}, Jitter: ${call.current_jitter}`);
+            
             if (call.current_mos && call.current_mos > 0) {
                 totalMos += call.current_mos;
-                totalPacketLoss += call.packet_loss_rate || 0;
-                totalJitter += call.jitter || 0;
+                totalPacketLoss += call.current_packet_loss || 0;
+                totalJitter += call.current_jitter || 0;
                 validCalls++;
+            } else {
+                console.log(`Skipping call ${call.call_id} - no valid MOS data`);
             }
         });
         
