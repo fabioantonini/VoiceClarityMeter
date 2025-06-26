@@ -464,8 +464,9 @@ class SIPRegistrar:
             
             # Check if destination is a test extension
             if to_ext and to_ext in self.test_extensions:
-                # Handle test extension call
-                self.handle_test_extension_call(to_ext, call_id, headers, addr, transport, client_socket)
+                # Use redirect for test extensions too (avoids ACK issues)
+                self.send_redirect_response(addr, headers, to_ext, transport, client_socket)
+                print(f"Test extension {to_ext} redirected for monitoring: {from_ext} -> {to_ext}")
             elif to_ext and to_ext in self.registered_devices:
                 # Forward INVITE to registered device
                 self.forward_invite(request_line, headers, to_ext, transport, client_socket)
