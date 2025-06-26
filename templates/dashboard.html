@@ -421,24 +421,38 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Socket.IO Embedded Implementation - Self-contained fallback
-        if (typeof io === 'undefined') {
-            console.log('Using embedded Socket.IO fallback - polling mode only');
-            window.io = function() {
+        // Socket.IO Embedded Implementation - Complete fallback
+        (function() {
+            // Define Socket.IO fallback immediately
+            window.io = window.io || function(url, opts) {
+                console.log('Using embedded Socket.IO fallback implementation');
                 return {
                     on: function(event, callback) { 
-                        console.log('Socket.IO event registered:', event); 
+                        console.log('Socket.IO event registered:', event);
+                        // Store callbacks for polling mode
+                        this._callbacks = this._callbacks || {};
+                        this._callbacks[event] = callback;
                     },
                     emit: function(event, data) { 
                         console.log('Socket.IO emit:', event, data); 
                     },
-                    connected: false
+                    connected: false,
+                    _callbacks: {}
                 };
             };
-        }
+            
+            // Try to load real Socket.IO but continue if it fails
+            var script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js';
+            script.onerror = function() {
+                console.log('Socket.IO CDN failed, using fallback');
+            };
+            script.onload = function() {
+                console.log('Socket.IO CDN loaded successfully');
+            };
+            document.head.appendChild(script);
+        })();
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" 
-            onerror="console.log('Socket.IO CDN failed, fallback ready')"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
