@@ -620,9 +620,9 @@ class SIPRegistrar:
         return response
         
     def extract_extension(self, header):
-        """Extract extension number from SIP header"""
-        # Match patterns like: sip:201@domain, sip:202@gateway.local
-        match = re.search(r'sip:(\d+)@', header)
+        """Extract username from SIP header"""
+        # Match patterns like: sip:gateway-monitor@domain, sip:201@gateway.local
+        match = re.search(r'sip:([^@]+)@', header)
         return match.group(1) if match else None
         
     def extract_contact_uri(self, contact_header):
