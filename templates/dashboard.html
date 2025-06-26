@@ -445,14 +445,37 @@
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script src="/static/js/dashboard_simple.js"></script>
     <script>
-        // Initialize dashboard
-        const dashboard = new Dashboard();
+        // Wait for Socket.IO to load before initializing dashboard
+        function initializeDashboard() {
+            if (typeof io !== 'undefined') {
+                const dashboard = new Dashboard();
+                window.dashboard = dashboard;
+            } else {
+                // Retry after 100ms if Socket.IO not loaded yet
+                setTimeout(initializeDashboard, 100);
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
         
         // Clear SIP messages function
         function clearSipMessages() {
             const sipMessages = document.getElementById('sipMessages');
             if (sipMessages) {
                 sipMessages.innerHTML = '<div class="text-muted">In attesa di messaggi SIP...</div>';
+            }
+        }
+        
+        // Clear SIP log function
+        function clearSipLog() {
+            clearSipMessages();
+        }
+        
+        // Refresh history function
+        function refreshHistory() {
+            if (window.dashboard) {
+                window.dashboard.loadCallHistory();
             }
         }
     </script>
