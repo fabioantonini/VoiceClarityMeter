@@ -23,13 +23,6 @@ class RTPProcessor:
         self.sequence_numbers = []
         self.timestamps = []
         self.detected_codec = 'G.711'  # Default codec, updated from RTP packets
-        self.last_update_time = time.time()
-        
-        # Initialize realistic metrics for real call monitoring
-        import random
-        self.simulated_packet_loss = random.uniform(0.2, 1.5)  # Real network conditions
-        self.simulated_jitter = random.uniform(8, 30)         # Real jitter range
-        self.simulated_delay = random.uniform(50, 95)         # Real delay range
         
     def start_processing(self):
         """Start processing RTP packets"""
@@ -58,11 +51,6 @@ class RTPProcessor:
                     if not self.call_manager.is_call_active(self.call_id):
                         print(f"Call {self.call_id} no longer active, stopping RTP processing")
                         break
-                    
-                    # Update metrics periodically even without RTP packets
-                    if time.time() - self.last_update_time > 2:
-                        self.update_call_metrics()
-                        self.last_update_time = time.time()
                     continue
                     
                 except Exception as e:
@@ -225,25 +213,18 @@ class RTPProcessor:
         return (self.packets_lost / total_expected) * 100
         
     def update_call_metrics(self):
-        """Update call quality metrics for real calls"""
+        """Update call quality metrics"""
         try:
-            # Generate realistic metrics for real call conditions
-            import random
+            jitter = self.get_jitter()
+            packet_loss = self.get_packet_loss_rate()
             
-            # Use base values with small variations to simulate real network conditions
-            packet_loss = self.simulated_packet_loss + random.uniform(-0.2, 0.2)
-            jitter = self.simulated_jitter + random.uniform(-3, 3)
-            delay = self.simulated_delay + random.uniform(-5, 5)
+            # Estimate delay (simplified - in production would use RTCP)
+            delay = 50  # Default assumption of 50ms delay
             
-            # Keep values in realistic ranges
-            packet_loss = max(0.0, min(3.0, packet_loss))
-            jitter = max(2.0, min(40.0, jitter))
-            delay = max(35.0, min(120.0, delay))
-            
-            # Calculate MOS score using realistic network conditions
+            # Calculate MOS score using detected codec
             mos_score = self.mos_calculator.calculate_mos(
-                packet_loss_rate=packet_loss,
-                jitter=jitter,
+                packet_loss_rate=int(packet_loss),
+                jitter=int(jitter),
                 delay=delay,
                 codec=self.detected_codec
             )
@@ -267,5 +248,3 @@ class RTPProcessor:
             print(f"Error updating call metrics: {e}")
             import traceback
             traceback.print_exc()
-    
-

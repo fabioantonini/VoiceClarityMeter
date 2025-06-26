@@ -355,27 +355,12 @@ class SIPRegistrar:
             print(f"Error handling SIP {transport} message: {e}")
             
     def parse_headers(self, header_lines):
-        """Parse SIP headers and extract SDP body"""
+        """Parse SIP headers"""
         headers = {}
-        body_lines = []
-        in_body = False
-        
         for line in header_lines:
-            if not line.strip():  # Empty line separates headers from body
-                in_body = True
-                continue
-                
-            if in_body:
-                body_lines.append(line)
-            elif ':' in line:
+            if ':' in line:
                 key, value = line.split(':', 1)
                 headers[key.strip().lower()] = value.strip()
-        
-        # Add SDP body to headers if present
-        if body_lines:
-            headers['body'] = '\n'.join(body_lines)
-            print(f"DEBUG SDP: Extracted SDP body with {len(body_lines)} lines")
-            
         return headers
         
     def handle_register(self, request_line, headers, addr, transport, client_socket=None):
@@ -494,19 +479,14 @@ class SIPRegistrar:
                     import time
                     time.sleep(2)  # Ring for 2 seconds
                     
-                    # Parse RTP port from incoming SDP or use fallback
-                    client_rtp_port = self.parse_sdp_port(headers)
-                    our_rtp_port = 5004  # Our monitoring port for receiving RTP
+                    # Use fixed RTP port for consistency
+                    rtp_port = 5004
+                    print(f"Starting RTP processing for call {call_id} on port {rtp_port}")
+                    self.start_rtp_processing(call_id, rtp_port, addr[0])
                     
-                    print(f"Client will send RTP to our port {our_rtp_port}, client RTP port: {client_rtp_port}")
-                    print(f"Starting RTP processing for call {call_id} on monitoring port {our_rtp_port}")
-                    
-                    # Start RTP processing on our monitoring port
-                    self.start_rtp_processing(call_id, our_rtp_port, addr[0])
-                    
-                    # Send 200 OK with SDP using our monitoring RTP port
-                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id, our_rtp_port)
-                    print(f"Call answered - monitoring RTP stream for {to_ext} on port {our_rtp_port}")
+                    # Send 200 OK with SDP using the same RTP port
+                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id, rtp_port)
+                    print(f"Call answered - monitoring RTP stream for {to_ext} on port {rtp_port}")
                 
                 # Execute delayed answer in separate thread
                 import threading
@@ -681,25 +661,8 @@ class SIPRegistrar:
         return header.split()[0] if header else 'unknown'
         
     def parse_sdp_port(self, headers):
-        """Parse RTP port from SDP in INVITE request"""
-        # Extract SDP from request body if present
-        body = headers.get('body', '')
-        if body:
-            # Look for m=audio line in SDP
-            for line in body.split('\n'):
-                line = line.strip()
-                if line.startswith('m=audio '):
-                    parts = line.split()
-                    if len(parts) >= 2:
-                        try:
-                            port = int(parts[1])
-                            print(f"DEBUG SDP: Extracted RTP port {port} from SDP")
-                            return port
-                        except ValueError:
-                            print(f"DEBUG SDP: Invalid port in line: {line}")
-        
-        print("DEBUG SDP: No RTP port found in SDP, using default 5004")
-        return 5004  # Fallback to our monitoring port
+        """Parse RTP port from SDP"""
+        return 8000  # Default RTP port for monitoring
         
     def generate_sdp(self, rtp_port=5004):
         """Generate SDP for call monitoring with specific RTP port"""
