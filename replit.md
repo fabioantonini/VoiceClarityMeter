@@ -111,6 +111,9 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 23, 2025: Added Opus codec support with automatic detection from RTP payload type and specific MOS calculation parameters
 - June 23, 2025: Implemented complete TLS support on port 5061 (SIPS) with certificate management system for secure SIP communications
 - June 23, 2025: Added SIP authentication system with predefined credentials for gateway registration (gateway-monitor/VoipQuality2025!, gateway-test/TestMonitor123, welcome-gw/WelcomeGW456)
+- June 26, 2025: Fixed SIP username extraction regex to handle alphanumeric usernames (gateway-monitor)
+- June 26, 2025: Resolved SIP call flow issues by eliminating 302 redirects - now uses standard 180 Ringing → 200 OK sequence for all calls
+- June 26, 2025: Fixed WebSocket connection issues in dashboard by adding proper Socket.IO initialization checks
 
 ## User Preferences
 

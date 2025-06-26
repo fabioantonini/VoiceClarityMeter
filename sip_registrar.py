@@ -462,18 +462,22 @@ class SIPRegistrar:
             
             self.call_manager.start_call(call_id, session_info)
             
-            # Check if destination is a test extension
-            if to_ext and to_ext in self.test_extensions:
+            # Handle all calls with standard SIP flow (no redirects)
+            if to_ext and to_ext in self.registered_devices:
+                # Forward INVITE to registered device
+                self.forward_invite(request_line, headers, to_ext, transport, client_socket)
+            else:
+                # Handle all calls (including test extensions and unknown destinations)
                 # Send 180 Ringing first
                 self.send_response(addr, '180', 'Ringing', headers, transport, client_socket)
-                print(f"Test extension {to_ext} ringing - call monitoring active: {from_ext} -> {to_ext}")
+                print(f"Extension {to_ext} ringing - call monitoring active: {from_ext} -> {to_ext}")
                 
                 # Send 200 OK with SDP after brief delay to simulate pickup
                 def delayed_answer():
                     import time
                     time.sleep(2)  # Ring for 2 seconds
                     self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id)
-                    print(f"Test extension {to_ext} answered - monitoring RTP stream")
+                    print(f"Call answered - monitoring RTP stream for {to_ext}")
                     
                     # Start RTP monitoring after call is answered
                     rtp_port = self.parse_sdp_port(headers)
@@ -483,18 +487,6 @@ class SIPRegistrar:
                 # Execute delayed answer in separate thread
                 import threading
                 threading.Thread(target=delayed_answer, daemon=True).start()
-            elif to_ext and to_ext in self.registered_devices:
-                # Forward INVITE to registered device
-                self.forward_invite(request_line, headers, to_ext, transport, client_socket)
-            else:
-                # Redirect call to monitoring endpoint (proxy behavior)
-                self.send_redirect_response(addr, headers, to_ext, transport, client_socket)
-                
-                # Still track the call attempt for monitoring
-                print(f"Call redirected for monitoring: {from_ext} -> {to_ext}")
-                
-                # Start lightweight RTP monitoring on the redirect target
-                # This allows monitoring without complex SIP endpoint behavior
                     
         except Exception as e:
             print(f"Error handling INVITE: {e}")
