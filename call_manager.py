@@ -98,6 +98,7 @@ class CallManager:
                     call_data['current_jitter'] = latest['jitter']
                     call_data['current_packet_loss'] = latest['packet_loss_rate']
                     call_data['codec'] = latest['codec']
+                    print(f"CALL MANAGER UPDATE - Call {call_id}: MOS={latest['mos_score']:.2f}, Loss={latest['packet_loss_rate']:.2f}%, Jitter={latest['jitter']:.2f}ms")
                 
                 # Mark as having updates for WebSocket broadcast
                 self.has_new_updates = True
