@@ -121,6 +121,11 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 26, 2025: Implemented fallback RTP port (5004) when SDP parsing fails
 - June 26, 2025: Removed duplicate "Messaggi SIP in Tempo Reale" section from dashboard template
 - June 26, 2025: Added robust Socket.IO loading with local fallback and CDN backup
+- June 26, 2025: Fixed Socket.IO "io is not defined" error with embedded fallback implementation
+- June 26, 2025: Implemented real-time charts for MOS Score and Network Quality Metrics with Chart.js
+- June 26, 2025: Fixed SIP messages accumulation with proper scrollbar container structure
+- June 26, 2025: Added comprehensive chart updates using real call data every 2 seconds
+- June 26, 2025: Synchronized SDP RTP port (5004) with actual RTP processor for consistent packet reception
 
 ## User Preferences
 
