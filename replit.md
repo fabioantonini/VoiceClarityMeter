@@ -115,6 +115,12 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 26, 2025: Resolved SIP call flow issues by eliminating 302 redirects - now uses standard 180 Ringing → 200 OK sequence for all calls
 - June 26, 2025: Fixed WebSocket connection issues in dashboard by adding proper Socket.IO initialization checks
 - June 26, 2025: Fixed SDP malformation causing "Incompatible SDP answer" error in Linphone - added proper \r\n line terminators to SDP format
+- June 26, 2025: Removed all "Asterisk" references for generic SIP client support - changed to "Gateway VoIP" and "Dispositivi SIP Registrati"
+- June 26, 2025: Added comprehensive RTP packet logging and MOS calculation debugging
+- June 26, 2025: Enhanced WebSocket broadcast system for real-time quality metrics transmission
+- June 26, 2025: Implemented fallback RTP port (5004) when SDP parsing fails
+- June 26, 2025: Removed duplicate "Messaggi SIP in Tempo Reale" section from dashboard template
+- June 26, 2025: Added robust Socket.IO loading with local fallback and CDN backup
 
 ## User Preferences
 
