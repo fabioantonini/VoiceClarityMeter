@@ -129,6 +129,11 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 26, 2025: Added Call History clear functionality with confirmation dialog and automatic cleanup
 - June 26, 2025: Implemented orphaned call detection and automatic cleanup every 5 minutes
 - June 26, 2025: Fixed Call History update timing to ensure all terminated calls are properly recorded
+- June 26, 2025: Verified MOS calculation system works correctly with dynamic values (test confirmed 4.38→1.08→1.00→4.05 with different parameters)
+- June 26, 2025: Fixed "Total Calls Today" counter to include both active and completed calls started today
+- June 26, 2025: Resolved Socket.IO loading issues with synchronous script loading for reliable dashboard updates
+- June 26, 2025: Added comprehensive debug logging for MOS calculation and RTP packet processing
+- June 26, 2025: Corrected JavaScript ID mappings for dashboard statistics display (calls-today, active-calls, avg-mos, avg-packet-loss)
 
 ## User Preferences
 

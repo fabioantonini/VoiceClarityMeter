@@ -143,16 +143,36 @@ class CallManager:
         """Get summary statistics"""
         with self.lock:
             now = datetime.now()
+            today_start = datetime.combine(now.date(), datetime.min.time())
+            today_end = datetime.combine(now.date(), datetime.max.time())
+            
+            # Count today's calls (including active ones)
+            today_calls_count = 0
+            
+            # Count completed calls from today
+            for call in self.call_history:
+                call_time = datetime.fromisoformat(call['start_time'])
+                if today_start <= call_time <= today_end:
+                    today_calls_count += 1
+            
+            # Count active calls started today
+            for call_id, call_data in self.active_calls.items():
+                call_time = datetime.fromisoformat(call_data['start_time'])
+                if today_start <= call_time <= today_end:
+                    today_calls_count += 1
             
             # Calculate statistics for different time periods
             stats = {
                 'total_calls': len(self.call_history),
                 'active_calls': len(self.active_calls),
+                'today_calls': today_calls_count,  # Add explicit today count
                 'today': self._get_period_stats(now.date(), now.date()),
                 'last_24h': self._get_period_stats(now - timedelta(days=1), now),
                 'last_7d': self._get_period_stats(now - timedelta(days=7), now),
                 'last_30d': self._get_period_stats(now - timedelta(days=30), now)
             }
+            
+            print(f"DEBUG: Today's calls count: {today_calls_count} (active: {len(self.active_calls)}, completed: {stats['today']['call_count']})")
             
             return stats
             

@@ -300,10 +300,10 @@ class Dashboard {
     updateSummaryStats(data) {
         // Update summary cards with real-time data
         const elements = {
-            'totalCalls': data.total_calls || 0,
-            'activeCalls': data.active_calls || 0,
-            'avgMos': (data.current_avg_mos || data.last_24h?.avg_mos || 0).toFixed(2),
-            'avgPacketLoss': (data.current_avg_packet_loss || data.last_24h?.avg_packet_loss || 0).toFixed(2)
+            'calls-today': data.today_calls || 0,  // Correct ID for "Total Calls Today"
+            'active-calls': data.active_calls || 0,
+            'avg-mos': (data.current_avg_mos || data.last_24h?.avg_mos || 0).toFixed(2),
+            'avg-packet-loss': (data.current_avg_packet_loss || data.last_24h?.avg_packet_loss || 0).toFixed(2) + '%'
         };
         
         Object.entries(elements).forEach(([id, value]) => {
