@@ -29,6 +29,9 @@ class MOSCalculator:
             MOS score (1.0 - 5.0)
         """
         try:
+            # Debug logging
+            print(f"DEBUG MOS: Calculating with Loss={packet_loss_rate}%, Jitter={jitter}ms, Delay={delay}ms, Codec={codec}")
+            
             # Calculate impairment factors
             Id = self._calculate_delay_impairment(delay)
             Ie_eff = self._calculate_equipment_impairment(packet_loss_rate, jitter, codec)
@@ -41,6 +44,8 @@ class MOSCalculator:
             
             # Convert R-factor to MOS
             mos = self._r_to_mos(R)
+            
+            print(f"DEBUG MOS: R-factor={R:.2f}, Final MOS={mos:.2f}")
             
             return round(mos, 2)
             

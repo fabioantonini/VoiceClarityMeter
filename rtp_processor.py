@@ -71,6 +71,7 @@ class RTPProcessor:
         """Process individual RTP packet"""
         try:
             if len(data) < 12:  # RTP header is at least 12 bytes
+                print(f"DEBUG RTP: Packet too short ({len(data)} bytes) from {addr}")
                 return
                 
             # Parse RTP header
@@ -80,9 +81,12 @@ class RTPProcessor:
                 self.packets_received += 1
                 current_time = time.time()
                 
+                print(f"DEBUG RTP: Packet #{self.packets_received} from {addr}, seq={rtp_header['sequence']}, PT={rtp_header.get('payload_type', 'unknown')}")
+                
                 # Update detected codec from RTP header
                 if 'codec' in rtp_header:
                     self.detected_codec = rtp_header['codec']
+                    print(f"DEBUG RTP: Codec detected: {self.detected_codec}")
                 
                 # Calculate packet loss
                 self.calculate_packet_loss(rtp_header['sequence'])
@@ -96,10 +100,15 @@ class RTPProcessor:
                 
                 # Update call metrics every 10 packets
                 if self.packets_received % 10 == 0:
+                    print(f"DEBUG RTP: Updating metrics after {self.packets_received} packets")
                     self.update_call_metrics()
+            else:
+                print(f"DEBUG RTP: Failed to parse RTP header from {addr}")
                     
         except Exception as e:
             print(f"Error processing packet: {e}")
+            import traceback
+            traceback.print_exc()
             
     def parse_rtp_header(self, data):
         """Parse RTP header"""

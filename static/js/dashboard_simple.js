@@ -298,18 +298,19 @@ class Dashboard {
     }
     
     updateSummaryStats(data) {
-        // Update summary cards
+        // Update summary cards with real-time data
         const elements = {
             'totalCalls': data.total_calls || 0,
             'activeCalls': data.active_calls || 0,
-            'avgMos': (data.avg_mos || 0).toFixed(2),
-            'avgPacketLoss': (data.avg_packet_loss || 0).toFixed(2)
+            'avgMos': (data.current_avg_mos || data.last_24h?.avg_mos || 0).toFixed(2),
+            'avgPacketLoss': (data.current_avg_packet_loss || data.last_24h?.avg_packet_loss || 0).toFixed(2)
         };
         
         Object.entries(elements).forEach(([id, value]) => {
             const element = document.getElementById(id);
             if (element) {
                 element.textContent = value;
+                console.log(`Updated ${id} to ${value}`);
             }
         });
         
@@ -318,6 +319,15 @@ class Dashboard {
         if (mosElement) {
             const mosValue = parseFloat(mosElement.textContent);
             mosElement.className = `h4 mb-0 badge ${this.getMosClass(mosValue)}`;
+        }
+        
+        // Update charts with real-time data
+        if (data.current_avg_mos > 0) {
+            this.updateCharts({
+                mos_score: data.current_avg_mos,
+                packet_loss_rate: data.current_avg_packet_loss,
+                jitter: data.current_avg_jitter || 0
+            });
         }
     }
     

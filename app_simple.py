@@ -127,6 +127,42 @@ def clear_call_history():
 def get_summary_stats():
     """Get summary statistics"""
     stats = call_manager.get_summary_stats()
+    
+    # Debug: Print stats to console
+    print(f"DEBUG: Summary stats - Active calls: {stats.get('active_calls', 0)}, Total calls: {stats.get('total_calls', 0)}")
+    if stats.get('last_24h'):
+        print(f"DEBUG: Last 24h - Call count: {stats['last_24h'].get('call_count', 0)}, Avg MOS: {stats['last_24h'].get('avg_mos', 0)}")
+    
+    # Add real-time data from active calls
+    active_calls = call_manager.get_active_calls()
+    if active_calls:
+        # Calculate current MOS from active calls
+        current_mos_scores = []
+        current_packet_loss = []
+        current_jitter = []
+        
+        for call in active_calls:
+            if call.get('quality_metrics'):
+                latest_metrics = call['quality_metrics'][-1] if call['quality_metrics'] else {}
+                if latest_metrics.get('mos_score', 0) > 0:
+                    current_mos_scores.append(latest_metrics['mos_score'])
+                    current_packet_loss.append(latest_metrics.get('packet_loss_rate', 0))
+                    current_jitter.append(latest_metrics.get('jitter', 0))
+        
+        if current_mos_scores:
+            stats['current_avg_mos'] = sum(current_mos_scores) / len(current_mos_scores)
+            stats['current_avg_packet_loss'] = sum(current_packet_loss) / len(current_packet_loss)
+            stats['current_avg_jitter'] = sum(current_jitter) / len(current_jitter)
+            print(f"DEBUG: Current real-time MOS: {stats['current_avg_mos']:.2f}")
+        else:
+            stats['current_avg_mos'] = 0
+            stats['current_avg_packet_loss'] = 0
+            stats['current_avg_jitter'] = 0
+    else:
+        stats['current_avg_mos'] = 0
+        stats['current_avg_packet_loss'] = 0
+        stats['current_avg_jitter'] = 0
+    
     return jsonify(stats)
 
 @app.route('/api/config/generate', methods=['POST'])
