@@ -48,10 +48,20 @@ class Dashboard {
     }
     
     setupPolling() {
-        // Fallback to HTTP polling
+        // More frequent polling for real-time updates
         setInterval(() => {
-            this.loadInitialData();
-        }, 5000); // Poll every 5 seconds
+            this.refreshActiveCalls();
+            this.refreshGatewayStatus();
+        }, 2000); // Poll every 2 seconds for active data
+        
+        setInterval(() => {
+            this.refreshSummaryStats();
+            this.refreshRegisteredDevices();
+        }, 5000); // Poll every 5 seconds for less critical data
+        
+        setInterval(() => {
+            this.refreshCallHistory();
+        }, 10000); // Poll every 10 seconds for history
     }
     
     setupRefreshTimer() {
@@ -201,8 +211,16 @@ class Dashboard {
         const cardElement = document.getElementById('gateway-status-card');
         
         if (statusElement && cardElement) {
-            if (data.gateway_connected) {
-                statusElement.textContent = `Connesso (${data.registered_extensions} int.)`;
+            // Check if there are active calls to determine connection status
+            const activeCalls = document.getElementById('activeCallsBody');
+            const hasActiveCalls = activeCalls && activeCalls.children.length > 0 && 
+                                 !activeCalls.innerHTML.includes('No active calls');
+            
+            if (data.gateway_connected || hasActiveCalls) {
+                const extensions = data.registered_extensions || 0;
+                statusElement.textContent = hasActiveCalls ? 
+                    `Connesso (chiamata attiva)` : 
+                    `Connesso (${extensions} int.)`;
                 cardElement.className = 'card bg-success text-white';
             } else {
                 statusElement.textContent = 'Disconnesso';

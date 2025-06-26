@@ -476,21 +476,15 @@ class SIPRegistrar:
                 def delayed_answer():
                     import time
                     time.sleep(2)  # Ring for 2 seconds
-                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id)
-                    print(f"Call answered - monitoring RTP stream for {to_ext}")
                     
-                    # Start RTP monitoring after call is answered
-                    rtp_port = self.parse_sdp_port(headers)
-                    print(f"DEBUG: Parsed RTP port: {rtp_port} for call {call_id}")
-                    if rtp_port:
-                        print(f"Starting RTP processing for call {call_id} on port {rtp_port}")
-                        self.start_rtp_processing(call_id, rtp_port, addr[0])
-                    else:
-                        print(f"WARNING: Could not parse RTP port from SDP for call {call_id}")
-                        # Try with default port for testing
-                        default_port = 5004
-                        print(f"Using default RTP port {default_port} for call {call_id}")
-                        self.start_rtp_processing(call_id, default_port, addr[0])
+                    # Use fixed RTP port for consistency
+                    rtp_port = 5004
+                    print(f"Starting RTP processing for call {call_id} on port {rtp_port}")
+                    self.start_rtp_processing(call_id, rtp_port, addr[0])
+                    
+                    # Send 200 OK with SDP using the same RTP port
+                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id, rtp_port)
+                    print(f"Call answered - monitoring RTP stream for {to_ext} on port {rtp_port}")
                 
                 # Execute delayed answer in separate thread
                 import threading
@@ -668,12 +662,9 @@ class SIPRegistrar:
         """Parse RTP port from SDP"""
         return 8000  # Default RTP port for monitoring
         
-    def generate_sdp(self):
-        """Generate SDP for call monitoring"""
+    def generate_sdp(self, rtp_port=5004):
+        """Generate SDP for call monitoring with specific RTP port"""
         local_ip = self.get_local_ip()
-        # Use dynamic RTP port
-        import random
-        rtp_port = random.randint(10000, 20000)
         
         return f"""v=0\r
 o=voip-monitor 123456 654321 IN IP4 {local_ip}\r
