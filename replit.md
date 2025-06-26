@@ -134,6 +134,9 @@ A real-time VoIP call quality monitoring system built with Python Flask that imp
 - June 26, 2025: Resolved Socket.IO loading issues with synchronous script loading for reliable dashboard updates
 - June 26, 2025: Added comprehensive debug logging for MOS calculation and RTP packet processing
 - June 26, 2025: Corrected JavaScript ID mappings for dashboard statistics display (calls-today, active-calls, avg-mos, avg-packet-loss)
+- June 26, 2025: Implemented HTTP polling system (2-second intervals) to replace Socket.IO for reliable real-time dashboard updates
+- June 26, 2025: Fixed "Active Calls" counter to update immediately when calls start/end with direct element updates in updateActiveCalls()
+- June 26, 2025: Added Clear History synchronization to refresh all statistics including "Total Calls Today" after history deletion
 
 ## User Preferences
 

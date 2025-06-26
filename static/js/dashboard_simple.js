@@ -2,52 +2,55 @@
 
 class Dashboard {
     constructor() {
-        this.socket = null;
         this.mosChart = null;
         this.networkChart = null;
-        this.initializeWebSocket();
+        this.pollingInterval = null;
         this.initializeCharts();
         this.loadInitialData();
-        this.setupRefreshTimer();
+        this.setupPolling();
     }
     
-    initializeWebSocket() {
-        // Check if Socket.IO is available
-        if (typeof io === 'undefined') {
-            console.warn('Socket.IO not loaded, using polling mode');
-            this.setupPolling();
-            return;
+    setupPolling() {
+        console.log('Setting up HTTP polling for real-time updates');
+        
+        // Clear any existing polling
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
         }
         
-        try {
-            this.socket = io();
+        // Poll every 2 seconds for updates
+        this.pollingInterval = setInterval(() => {
+            this.pollForUpdates();
+        }, 2000);
+        
+        // Initial poll
+        this.pollForUpdates();
+    }
+    
+    pollForUpdates() {
+        // Poll active calls and update counter
+        fetch('/api/calls/active')
+            .then(response => response.json())
+            .then(data => {
+                this.updateActiveCalls(data);
+            })
+            .catch(error => console.log('Active calls polling error:', error));
+        
+        // Poll summary stats
+        fetch('/api/stats/summary')
+            .then(response => response.json())
+            .then(data => {
+                this.updateSummaryStats(data);
+            })
+            .catch(error => console.log('Stats polling error:', error));
             
-            this.socket.on('connect', () => {
-                console.log('Connected to real-time updates');
-                this.showStatus('Connected to real-time updates', 'success');
-            });
-            
-            this.socket.on('disconnect', () => {
-                console.log('Disconnected from real-time updates');
-                this.showStatus('Disconnected - using polling mode', 'warning');
-                this.setupPolling();
-            });
-            
-            this.socket.on('call_update', (data) => {
-                this.updateDashboard(data);
-            });
-            
-            this.socket.on('status', (data) => {
-                this.showStatus(data.message, 'info');
-            });
-            
-            this.socket.on('sip_message', (data) => {
-                this.addSipMessage(data);
-            });
-        } catch (error) {
-            console.error('WebSocket connection failed:', error);
-            this.setupPolling();
-        }
+        // Poll gateway status
+        fetch('/api/gateway/status')
+            .then(response => response.json())
+            .then(data => {
+                this.updateGatewayStatus(data);
+            })
+            .catch(error => console.log('Gateway polling error:', error));
     }
     
     initializeCharts() {
@@ -240,6 +243,12 @@ class Dashboard {
         if (!tbody) return;
         
         tbody.innerHTML = '';
+        
+        // Update Active Calls counter in top-left card
+        const activeCallsElement = document.getElementById('active-calls');
+        if (activeCallsElement) {
+            activeCallsElement.textContent = calls.length;
+        }
         
         if (calls.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No active calls</td></tr>';
