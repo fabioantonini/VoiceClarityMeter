@@ -607,6 +607,12 @@ class SIPRegistrar:
         to_header = request_headers.get('to', '')
         cseq = request_headers.get('cseq', '')
         
+        # Add tag to To header if not present (required for 200 OK responses)
+        if 'tag=' not in to_header:
+            import random
+            tag = f"tag={random.randint(1000000, 9999999)}"
+            to_header += f";{tag}"
+        
         response = "SIP/2.0 200 OK\r\n"
         response += f"Via: {via}\r\n"
         response += f"Call-ID: {call_id}\r\n"
