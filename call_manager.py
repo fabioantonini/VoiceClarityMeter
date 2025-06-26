@@ -90,6 +90,16 @@ class CallManager:
                 if current_metrics:
                     latest = current_metrics[-1]
                     call_data['current_mos'] = latest['mos_score']
+                    call_data['current_jitter'] = latest['jitter']
+                    call_data['current_packet_loss'] = latest['packet_loss_rate']
+                    call_data['codec'] = latest['codec']
+                
+                # Mark as having updates for WebSocket broadcast
+                self.has_new_updates = True
+                
+                if current_metrics:
+                    latest = current_metrics[-1]
+                    call_data['current_mos'] = latest['mos_score']
                     call_data['packet_loss_rate'] = latest['packet_loss_rate']
                     call_data['current_jitter'] = latest['jitter']
                     call_data['current_delay'] = latest['delay']

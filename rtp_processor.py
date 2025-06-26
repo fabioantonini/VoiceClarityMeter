@@ -233,6 +233,9 @@ class RTPProcessor:
             }
             
             self.call_manager.update_call_metrics(self.call_id, metrics)
+            print(f"Call {self.call_id}: MOS={mos_score:.2f}, Loss={packet_loss:.1f}%, Jitter={jitter:.1f}ms, Codec={self.detected_codec}")
             
         except Exception as e:
             print(f"Error updating call metrics: {e}")
+            import traceback
+            traceback.print_exc()

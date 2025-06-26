@@ -351,6 +351,12 @@ def broadcast_call_updates():
                     active_calls = call_manager.get_active_calls()
                     summary_stats = call_manager.get_summary_stats()
                     
+                    print(f"Broadcasting update: {len(active_calls)} active calls")
+                    if active_calls:
+                        for call in active_calls:
+                            if 'current_mos' in call:
+                                print(f"  Call {call['call_id']}: MOS={call.get('current_mos', 'N/A')}")
+                    
                     # Broadcast to all connected clients
                     socketio.emit('call_update', {
                         'active_calls': active_calls,
