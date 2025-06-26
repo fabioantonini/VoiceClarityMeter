@@ -51,6 +51,12 @@ class RTPProcessor:
                     if not self.call_manager.is_call_active(self.call_id):
                         print(f"Call {self.call_id} no longer active, stopping RTP processing")
                         break
+                    
+                    # Update with zero metrics if no packets received
+                    if time.time() - self.last_update_time > 5:
+                        print(f"DEBUG RTP: No packets for 5s on port {self.port}, updating with zero metrics")
+                        self.update_call_metrics_with_zeros()
+                        self.last_update_time = time.time()
                     continue
                     
                 except Exception as e:
@@ -248,3 +254,24 @@ class RTPProcessor:
             print(f"Error updating call metrics: {e}")
             import traceback
             traceback.print_exc()
+    
+    def update_call_metrics_with_zeros(self):
+        """Update call metrics with zero values when no RTP packets are received"""
+        try:
+            # Create zero metrics to show the call is active but no RTP data
+            metrics = {
+                'timestamp': datetime.now().isoformat(),
+                'packets_received': self.packets_received,  # Might still be 0
+                'packets_lost': self.packets_lost,
+                'packet_loss_rate': 0.0,
+                'jitter': 0.0,
+                'delay': 50,  # Default delay assumption
+                'mos_score': 0.0,  # Zero indicates no RTP data
+                'codec': 'No RTP'
+            }
+            
+            self.call_manager.update_call_metrics(self.call_id, metrics)
+            print(f"Call {self.call_id}: No RTP packets - MOS=0.0 (waiting for media)")
+            
+        except Exception as e:
+            print(f"Error updating zero metrics: {e}")

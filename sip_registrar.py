@@ -504,9 +504,9 @@ class SIPRegistrar:
                     # Start RTP processing on our monitoring port
                     self.start_rtp_processing(call_id, our_rtp_port, addr[0])
                     
-                    # Send 200 OK with SDP using the same RTP port
-                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id, rtp_port)
-                    print(f"Call answered - monitoring RTP stream for {to_ext} on port {rtp_port}")
+                    # Send 200 OK with SDP using our monitoring RTP port
+                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id, our_rtp_port)
+                    print(f"Call answered - monitoring RTP stream for {to_ext} on port {our_rtp_port}")
                 
                 # Execute delayed answer in separate thread
                 import threading
