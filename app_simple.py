@@ -155,13 +155,20 @@ def get_summary_stats():
             stats['current_avg_jitter'] = sum(current_jitter) / len(current_jitter)
             print(f"DEBUG: Current real-time MOS: {stats['current_avg_mos']:.2f}")
         else:
+            # No real metrics available, show system status
             stats['current_avg_mos'] = 0
             stats['current_avg_packet_loss'] = 0
             stats['current_avg_jitter'] = 0
     else:
-        stats['current_avg_mos'] = 0
-        stats['current_avg_packet_loss'] = 0
-        stats['current_avg_jitter'] = 0
+        # No active calls, use historical data if available
+        if stats.get('last_24h') and stats['last_24h']['call_count'] > 0:
+            stats['current_avg_mos'] = stats['last_24h']['avg_mos']
+            stats['current_avg_packet_loss'] = stats['last_24h']['avg_packet_loss']
+            stats['current_avg_jitter'] = stats['last_24h'].get('avg_jitter', 0)
+        else:
+            stats['current_avg_mos'] = 0
+            stats['current_avg_packet_loss'] = 0
+            stats['current_avg_jitter'] = 0
     
     return jsonify(stats)
 
@@ -187,6 +194,42 @@ def test_connectivity():
     
     result = config_helper.test_connectivity(target_ip, target_port)
     return jsonify(result)
+
+@app.route('/api/test/mos-calculation', methods=['POST'])
+@require_login
+def test_mos_calculation():
+    """Test MOS calculation with different parameters"""
+    try:
+        data = request.get_json()
+        packet_loss = data.get('packet_loss', 0)
+        jitter = data.get('jitter', 0)
+        delay = data.get('delay', 50)
+        codec = data.get('codec', 'G.711')
+        
+        from mos_calculator import MOSCalculator
+        mos_calc = MOSCalculator()
+        
+        mos_score = mos_calc.calculate_mos(
+            packet_loss_rate=packet_loss,
+            jitter=jitter,
+            delay=delay,
+            codec=codec
+        )
+        
+        return jsonify({
+            'success': True,
+            'input': {
+                'packet_loss': packet_loss,
+                'jitter': jitter,
+                'delay': delay,
+                'codec': codec
+            },
+            'mos_score': mos_score,
+            'quality_category': mos_calc.calculate_quality_category(mos_score)
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/devices/registered')
 @require_login
