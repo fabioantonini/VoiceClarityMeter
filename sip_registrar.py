@@ -464,14 +464,25 @@ class SIPRegistrar:
             
             # Check if destination is a test extension
             if to_ext and to_ext in self.test_extensions:
-                # Use 180 Ringing for test extensions (no ACK required)
+                # Send 180 Ringing first
                 self.send_response(addr, '180', 'Ringing', headers, transport, client_socket)
                 print(f"Test extension {to_ext} ringing - call monitoring active: {from_ext} -> {to_ext}")
                 
-                # Start RTP monitoring while call is ringing
-                rtp_port = self.parse_sdp_port(headers)
-                if rtp_port:
-                    self.start_rtp_processing(call_id, rtp_port, addr[0])
+                # Send 200 OK with SDP after brief delay to simulate pickup
+                def delayed_answer():
+                    import time
+                    time.sleep(2)  # Ring for 2 seconds
+                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id)
+                    print(f"Test extension {to_ext} answered - monitoring RTP stream")
+                    
+                    # Start RTP monitoring after call is answered
+                    rtp_port = self.parse_sdp_port(headers)
+                    if rtp_port:
+                        self.start_rtp_processing(call_id, rtp_port, addr[0])
+                
+                # Execute delayed answer in separate thread
+                import threading
+                threading.Thread(target=delayed_answer, daemon=True).start()
             elif to_ext and to_ext in self.registered_devices:
                 # Forward INVITE to registered device
                 self.forward_invite(request_line, headers, to_ext, transport, client_socket)
