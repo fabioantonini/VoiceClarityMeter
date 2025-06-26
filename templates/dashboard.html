@@ -453,10 +453,7 @@
                 if (typeof Dashboard !== 'undefined') {
                     console.log('Dashboard initialized in HTTP polling mode');
                     window.dashboard = new Dashboard();
-                    
-                    // Start HTTP polling for real-time updates
-                    startPollingUpdates();
-                    console.log('HTTP polling started for real-time updates');
+                    console.log('HTTP polling started automatically by Dashboard class');
                 } else {
                     console.error('Dashboard class not found');
                 }
