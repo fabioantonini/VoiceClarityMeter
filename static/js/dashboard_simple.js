@@ -264,6 +264,9 @@ class Dashboard {
             `;
             tbody.appendChild(row);
         });
+        
+        // Update charts with real-time data from active calls
+        this.updateChartsFromActiveCalls(calls);
     }
     
     updateCallHistory(calls) {
@@ -512,6 +515,68 @@ class Dashboard {
         const messages = sipContainer.children;
         if (messages.length > 100) {
             sipContainer.removeChild(messages[0]);
+        }
+    }
+    
+    updateChartsFromActiveCalls(calls) {
+        if (!calls || calls.length === 0) return;
+        
+        // Calculate average metrics from active calls
+        let totalMos = 0;
+        let totalPacketLoss = 0;
+        let totalJitter = 0;
+        let validCalls = 0;
+        
+        calls.forEach(call => {
+            if (call.current_mos && call.current_mos > 0) {
+                totalMos += call.current_mos;
+                totalPacketLoss += call.packet_loss_rate || 0;
+                totalJitter += call.jitter || 0;
+                validCalls++;
+            }
+        });
+        
+        if (validCalls > 0) {
+            const avgMos = totalMos / validCalls;
+            const avgPacketLoss = totalPacketLoss / validCalls;
+            const avgJitter = totalJitter / validCalls;
+            const currentTime = new Date().toLocaleTimeString();
+            
+            this.updateCharts(currentTime, avgMos, avgPacketLoss, avgJitter);
+        }
+    }
+    
+    updateCharts(time, mosScore, packetLoss, jitter) {
+        // Update MOS Chart
+        if (this.mosChart) {
+            const mosData = this.mosChart.data;
+            mosData.labels.push(time);
+            mosData.datasets[0].data.push(mosScore);
+            
+            // Keep only last 20 data points
+            if (mosData.labels.length > 20) {
+                mosData.labels.shift();
+                mosData.datasets[0].data.shift();
+            }
+            
+            this.mosChart.update('none');
+        }
+        
+        // Update Network Quality Chart
+        if (this.networkChart) {
+            const networkData = this.networkChart.data;
+            networkData.labels.push(time);
+            networkData.datasets[0].data.push(packetLoss); // Packet Loss
+            networkData.datasets[1].data.push(jitter);     // Jitter
+            
+            // Keep only last 20 data points
+            if (networkData.labels.length > 20) {
+                networkData.labels.shift();
+                networkData.datasets[0].data.shift();
+                networkData.datasets[1].data.shift();
+            }
+            
+            this.networkChart.update('none');
         }
     }
 }
