@@ -462,16 +462,16 @@ class SIPRegistrar:
             
             self.call_manager.start_call(call_id, session_info)
             
-            # Check if destination is echo service (termination point for redirects)
-            if to_ext == 'echo':
-                # Echo service accepts calls and generates audio for testing
-                self.send_response(addr, '486', 'Busy Here', headers, transport, client_socket)
-                print(f"Echo service busy response sent to {from_ext}")
-            # Check if destination is a test extension  
-            elif to_ext and to_ext in self.test_extensions:
-                # Use redirect for test extensions too (avoids ACK issues)
-                self.send_redirect_response(addr, headers, to_ext, transport, client_socket)
-                print(f"Test extension {to_ext} redirected for monitoring: {from_ext} -> {to_ext}")
+            # Check if destination is a test extension
+            if to_ext and to_ext in self.test_extensions:
+                # Use 180 Ringing for test extensions (no ACK required)
+                self.send_response(addr, '180', 'Ringing', headers, transport, client_socket)
+                print(f"Test extension {to_ext} ringing - call monitoring active: {from_ext} -> {to_ext}")
+                
+                # Start RTP monitoring while call is ringing
+                rtp_port = self.parse_sdp_port(headers)
+                if rtp_port:
+                    self.start_rtp_processing(call_id, rtp_port, addr[0])
             elif to_ext and to_ext in self.registered_devices:
                 # Forward INVITE to registered device
                 self.forward_invite(request_line, headers, to_ext, transport, client_socket)
