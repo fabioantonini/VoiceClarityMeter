@@ -470,13 +470,23 @@ class SIPRegistrar:
                 # Forward INVITE to registered device
                 self.forward_invite(request_line, headers, to_ext, transport, client_socket)
             else:
-                # Send 200 OK with SDP (simulate accepting the call for monitoring)
-                self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id)
+                # Send 180 Ringing first (more standard SIP flow)
+                self.send_response(addr, '180', 'Ringing', headers, transport, client_socket)
                 
-                # Start RTP monitoring
-                rtp_port = self.parse_sdp_port(headers)
-                if rtp_port:
-                    self.start_rtp_processing(call_id, rtp_port, addr[0])
+                # Send 200 OK with SDP after brief delay
+                def delayed_answer():
+                    import time
+                    time.sleep(0.5)  # Brief delay to simulate realistic call pickup
+                    self.send_ok_with_sdp(addr, headers, transport, client_socket, call_id)
+                    
+                    # Start RTP monitoring
+                    rtp_port = self.parse_sdp_port(headers)
+                    if rtp_port:
+                        self.start_rtp_processing(call_id, rtp_port, addr[0])
+                
+                # Execute delayed answer in separate thread
+                import threading
+                threading.Thread(target=delayed_answer, daemon=True).start()
                     
         except Exception as e:
             print(f"Error handling INVITE: {e}")
@@ -485,8 +495,11 @@ class SIPRegistrar:
     def handle_ack(self, request_line, headers, addr, transport, client_socket=None):
         """Handle ACK requests"""
         call_id = headers.get('call-id')
+        print(f"DEBUG: Received ACK for call {call_id} from {addr} via {transport}")
         if call_id and self.call_manager.is_call_active(call_id):
-            print(f"Call {call_id} confirmed via {transport}")
+            print(f"Call {call_id} confirmed and established via {transport}")
+        else:
+            print(f"WARNING: ACK received for inactive call {call_id}")
             
     def handle_bye(self, request_line, headers, addr, transport, client_socket=None):
         """Handle BYE requests"""
@@ -664,7 +677,7 @@ a=rtpmap:0 PCMU/8000
 a=rtpmap:8 PCMA/8000
 a=rtpmap:18 G729/8000
 a=rtpmap:101 telephone-event/8000
-a=fmtp:18 annexb=no
+a=fmtp:18 annexb=yes
 a=sendrecv
 """
         
