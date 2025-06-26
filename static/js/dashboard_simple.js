@@ -637,9 +637,9 @@ class Dashboard {
     }
 }
 
-// Initialize dashboard when DOM is loaded
+// Initialize dashboard when DOM is loaded (single instance)
 document.addEventListener('DOMContentLoaded', function() {
-    new Dashboard();
+    window.dashboard = new Dashboard();
 });
 
 // Clear SIP log function
@@ -654,8 +654,3 @@ function refreshHistory() {
         window.dashboard.refreshCallHistory();
     }
 }
-
-// Store dashboard instance globally for debugging
-document.addEventListener('DOMContentLoaded', function() {
-    window.dashboard = new Dashboard();
-});
