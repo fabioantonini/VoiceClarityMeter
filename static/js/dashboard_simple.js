@@ -519,7 +519,19 @@ class Dashboard {
     }
     
     updateChartsFromActiveCalls(calls) {
-        if (!calls || calls.length === 0) return;
+        if (!calls || calls.length === 0) {
+            // Clear charts when no active calls
+            this.clearCharts();
+            return;
+        }
+        
+        // Check if this is a new call (different call_id from last update)
+        const currentCallIds = calls.map(call => call.call_id).join(',');
+        if (this.lastCallIds && this.lastCallIds !== currentCallIds) {
+            console.log('New call detected, clearing charts');
+            this.clearCharts();
+        }
+        this.lastCallIds = currentCallIds;
         
         // Calculate average metrics from active calls
         let totalMos = 0;
@@ -576,6 +588,23 @@ class Dashboard {
                 networkData.datasets[1].data.shift();
             }
             
+            this.networkChart.update('none');
+        }
+    }
+    
+    clearCharts() {
+        // Clear MOS Chart
+        if (this.mosChart) {
+            this.mosChart.data.labels = [];
+            this.mosChart.data.datasets[0].data = [];
+            this.mosChart.update('none');
+        }
+        
+        // Clear Network Quality Chart
+        if (this.networkChart) {
+            this.networkChart.data.labels = [];
+            this.networkChart.data.datasets[0].data = [];
+            this.networkChart.data.datasets[1].data = [];
             this.networkChart.update('none');
         }
     }

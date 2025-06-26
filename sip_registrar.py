@@ -453,6 +453,8 @@ class SIPRegistrar:
             
             # Track call for quality monitoring
             session_info = {
+                'from': from_ext or self.extract_address(from_header),
+                'to': to_ext or self.extract_address(to_header), 
                 'from_address': from_ext or self.extract_address(from_header),
                 'to_address': to_ext or self.extract_address(to_header),
                 'transport': transport,

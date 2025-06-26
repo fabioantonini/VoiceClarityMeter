@@ -25,6 +25,8 @@ class CallManager:
                 'duration': 0,
                 'from': session_info.get('from', ''),
                 'to': session_info.get('to', ''),
+                'from_address': session_info.get('from', ''),
+                'to_address': session_info.get('to', ''),
                 'status': 'active',
                 'quality_metrics': [],
                 'avg_mos': 0,
