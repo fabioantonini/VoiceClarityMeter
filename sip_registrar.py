@@ -462,8 +462,13 @@ class SIPRegistrar:
             
             self.call_manager.start_call(call_id, session_info)
             
-            # Check if destination is a test extension
-            if to_ext and to_ext in self.test_extensions:
+            # Check if destination is echo service (termination point for redirects)
+            if to_ext == 'echo':
+                # Echo service accepts calls and generates audio for testing
+                self.send_response(addr, '486', 'Busy Here', headers, transport, client_socket)
+                print(f"Echo service busy response sent to {from_ext}")
+            # Check if destination is a test extension  
+            elif to_ext and to_ext in self.test_extensions:
                 # Use redirect for test extensions too (avoids ACK issues)
                 self.send_redirect_response(addr, headers, to_ext, transport, client_socket)
                 print(f"Test extension {to_ext} redirected for monitoring: {from_ext} -> {to_ext}")
